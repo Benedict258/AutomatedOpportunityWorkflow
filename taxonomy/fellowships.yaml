@@ -1,0 +1,55 @@
+nodes:
+  - id: fellowship
+    name: FELLOWSHIP
+    parent: null
+    active: true
+
+  - id: fellowship.academic
+    name: Academic
+    parent: fellowship
+    active: true
+
+  - id: fellowship.research
+    name: Research
+    parent: fellowship
+    active: true
+
+  - id: fellowship.leadership
+    name: Leadership
+    parent: fellowship
+    active: true
+
+  - id: fellowship.technology
+    name: Technology
+    parent: fellowship
+    active: true
+
+  - id: fellowship.cybersecurity
+    name: Cybersecurity
+    parent: fellowship
+    active: true
+
+  - id: fellowship.policy
+    name: Policy
+    parent: fellowship
+    active: true
+
+  - id: fellowship.technology_policy
+    name: Technology Policy
+    parent: fellowship
+    active: true
+
+  - id: fellowship.international_affairs
+    name: International Affairs
+    parent: fellowship
+    active: true
+
+  - id: fellowship.diplomacy
+    name: Diplomacy
+    parent: fellowship
+    active: true
+
+  - id: fellowship.international_development
+    name: International Development
+    parent: fellowship
+    active: true

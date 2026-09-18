@@ -1,0 +1,65 @@
+nodes:
+  - id: policy
+    name: POLICY
+    parent: null
+    active: true
+
+  - id: policy.technology_policy
+    name: Technology Policy
+    parent: policy
+    active: true
+
+  - id: policy.ai_policy
+    name: AI Policy
+    parent: policy
+    active: true
+
+  - id: policy.cyber_policy
+    name: Cyber Policy
+    parent: policy
+    active: true
+
+  - id: policy.data_policy
+    name: Data Policy
+    parent: policy
+    active: true
+
+  - id: policy.privacy
+    name: Privacy
+    parent: policy
+    active: true
+
+  - id: policy.digital_governance
+    name: Digital Governance
+    parent: policy
+    active: true
+
+  - id: policy.ai_governance
+    name: AI Governance
+    parent: policy
+    active: true
+
+  - id: policy.technology_regulation
+    name: Technology Regulation
+    parent: policy
+    active: true
+
+  - id: policy.cyber_regulation
+    name: Cyber Regulation
+    parent: policy
+    active: true
+
+  - id: policy.telecommunications_policy
+    name: Telecommunications Policy
+    parent: policy
+    active: true
+
+  - id: policy.digital_markets
+    name: Digital Markets
+    parent: policy
+    active: true
+
+  - id: policy.technology_diplomacy
+    name: Technology Diplomacy
+    parent: policy
+    active: true

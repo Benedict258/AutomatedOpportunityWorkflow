@@ -1,0 +1,100 @@
+nodes:
+  - id: news
+    name: NEWS
+    parent: null
+    active: true
+
+  - id: news.technology
+    name: Technology
+    parent: news
+    active: true
+
+  - id: news.technology.ai
+    name: AI
+    parent: news.technology
+    active: true
+
+  - id: news.technology.cloud
+    name: Cloud
+    parent: news.technology
+    active: true
+
+  - id: news.technology.software
+    name: Software
+    parent: news.technology
+    active: true
+
+  - id: news.technology.data
+    name: Data
+    parent: news.technology
+    active: true
+
+  - id: news.technology.emerging_technology
+    name: Emerging Technology
+    parent: news.technology
+    active: true
+
+  - id: news.cybersecurity
+    name: Cybersecurity
+    parent: news
+    active: true
+
+  - id: news.government
+    name: Government
+    parent: news
+    active: true
+
+  - id: news.policy
+    name: Policy
+    parent: news
+    active: true
+
+  - id: news.policy.technology_policy
+    name: Technology Policy
+    parent: news.policy
+    active: true
+
+  - id: news.policy.ai_policy
+    name: AI Policy
+    parent: news.policy
+    active: true
+
+  - id: news.policy.cyber_policy
+    name: Cyber Policy
+    parent: news.policy
+    active: true
+
+  - id: news.policy.data_policy
+    name: Data Policy
+    parent: news.policy
+    active: true
+
+  - id: news.international_affairs
+    name: International Affairs
+    parent: news
+    active: true
+
+  - id: news.international_affairs.geopolitics
+    name: Geopolitics
+    parent: news.international_affairs
+    active: true
+
+  - id: news.international_affairs.diplomacy
+    name: Diplomacy
+    parent: news.international_affairs
+    active: true
+
+  - id: news.international_affairs.international_security
+    name: International Security
+    parent: news.international_affairs
+    active: true
+
+  - id: news.international_affairs.global_technology
+    name: Global Technology
+    parent: news.international_affairs
+    active: true
+
+  - id: news.international_affairs.development
+    name: Development
+    parent: news.international_affairs
+    active: true

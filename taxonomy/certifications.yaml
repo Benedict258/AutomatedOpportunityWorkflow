@@ -1,0 +1,60 @@
+nodes:
+  - id: education
+    name: EDUCATION
+    parent: null
+    active: true
+
+  - id: education.certification
+    name: Certification
+    parent: education
+    active: true
+
+  - id: education.certification.cybersecurity
+    name: Cybersecurity
+    parent: education.certification
+    active: true
+
+  - id: education.certification.cloud
+    name: Cloud
+    parent: education.certification
+    active: true
+
+  - id: education.certification.data
+    name: Data
+    parent: education.certification
+    active: true
+
+  - id: education.certification.ai
+    name: AI
+    parent: education.certification
+    active: true
+
+  - id: education.certification.technology
+    name: Technology
+    parent: education.certification
+    active: true
+
+  - id: education.course
+    name: Course
+    parent: education
+    active: true
+
+  - id: education.bootcamp
+    name: Bootcamp
+    parent: education
+    active: true
+
+  - id: education.training
+    name: Training
+    parent: education
+    active: true
+
+  - id: education.professional_program
+    name: Professional Program
+    parent: education
+    active: true
+
+  - id: education.scholarship
+    name: Scholarship
+    parent: education
+    active: true

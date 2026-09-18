@@ -1,0 +1,341 @@
+nodes:
+  - id: opportunity
+    name: OPPORTUNITY
+    parent: null
+    description: Root opportunity taxonomy
+    active: true
+
+  - id: work
+    name: WORK
+    parent: opportunity
+    active: true
+
+  - id: work.internship
+    name: Internship
+    parent: work
+    active: true
+
+  - id: work.coop
+    name: Co-op
+    parent: work
+    active: true
+
+  - id: work.part_time
+    name: Part-time
+    parent: work
+    active: true
+
+  - id: work.full_time
+    name: Full-time
+    parent: work
+    active: true
+
+  - id: work.contract
+    name: Contract
+    parent: work
+    active: true
+
+  - id: work.apprenticeship
+    name: Apprenticeship
+    parent: work
+    active: true
+
+  - id: technical_experience
+    name: TECHNICAL EXPERIENCE
+    parent: opportunity
+    active: true
+
+  - id: technical_experience.hackathon
+    name: Hackathon
+    parent: technical_experience
+    active: true
+
+  - id: technical_experience.competition
+    name: Competition
+    parent: technical_experience
+    active: true
+
+  - id: technical_experience.open_source
+    name: Open Source
+    parent: technical_experience
+    active: true
+
+  - id: technical_experience.research
+    name: Research
+    parent: technical_experience
+    active: true
+
+  - id: technical_experience.project_program
+    name: Project Program
+    parent: technical_experience
+    active: true
+
+  - id: technical_experience.challenge
+    name: Challenge
+    parent: technical_experience
+    active: true
+
+  - id: cybersecurity
+    name: CYBERSECURITY
+    parent: opportunity
+    active: true
+
+  - id: cybersecurity.internship
+    name: Internship
+    parent: cybersecurity
+    active: true
+
+  - id: cybersecurity.ctf
+    name: CTF
+    parent: cybersecurity
+    active: true
+
+  - id: cybersecurity.security_program
+    name: Security Program
+    parent: cybersecurity
+    active: true
+
+  - id: cybersecurity.research
+    name: Research
+    parent: cybersecurity
+    active: true
+
+  - id: cybersecurity.training
+    name: Training
+    parent: cybersecurity
+    active: true
+
+  - id: cybersecurity.scholarship
+    name: Scholarship
+    parent: cybersecurity
+    active: true
+
+  - id: government
+    name: GOVERNMENT
+    parent: opportunity
+    active: true
+
+  - id: government.federal
+    name: Federal
+    parent: government
+    active: true
+
+  - id: government.state
+    name: State
+    parent: government
+    active: true
+
+  - id: government.local
+    name: Local
+    parent: government
+    active: true
+
+  - id: government.public_sector
+    name: Public Sector
+    parent: government
+    active: true
+
+  - id: government.intelligence
+    name: Intelligence
+    parent: government
+    active: true
+
+  - id: government.national_security
+    name: National Security
+    parent: government
+    active: true
+
+  - id: government.government_technology
+    name: Government Technology
+    parent: government
+    active: true
+
+  - id: policy
+    name: POLICY
+    parent: opportunity
+    active: true
+
+  - id: policy.technology_policy
+    name: Technology Policy
+    parent: policy
+    active: true
+
+  - id: policy.ai_policy
+    name: AI Policy
+    parent: policy
+    active: true
+
+  - id: policy.cyber_policy
+    name: Cyber Policy
+    parent: policy
+    active: true
+
+  - id: policy.data_policy
+    name: Data Policy
+    parent: policy
+    active: true
+
+  - id: policy.digital_governance
+    name: Digital Governance
+    parent: policy
+    active: true
+
+  - id: international_affairs
+    name: INTERNATIONAL AFFAIRS
+    parent: opportunity
+    active: true
+
+  - id: international_affairs.diplomacy
+    name: Diplomacy
+    parent: international_affairs
+    active: true
+
+  - id: international_affairs.foreign_policy
+    name: Foreign Policy
+    parent: international_affairs
+    active: true
+
+  - id: international_affairs.international_security
+    name: International Security
+    parent: international_affairs
+    active: true
+
+  - id: international_affairs.international_development
+    name: International Development
+    parent: international_affairs
+    active: true
+
+  - id: international_affairs.global_governance
+    name: Global Governance
+    parent: international_affairs
+    active: true
+
+  - id: fellowship
+    name: FELLOWSHIP
+    parent: opportunity
+    active: true
+
+  - id: fellowship.academic
+    name: Academic
+    parent: fellowship
+    active: true
+
+  - id: fellowship.research
+    name: Research
+    parent: fellowship
+    active: true
+
+  - id: fellowship.leadership
+    name: Leadership
+    parent: fellowship
+    active: true
+
+  - id: fellowship.policy
+    name: Policy
+    parent: fellowship
+    active: true
+
+  - id: fellowship.international_affairs
+    name: International Affairs
+    parent: fellowship
+    active: true
+
+  - id: education
+    name: EDUCATION
+    parent: opportunity
+    active: true
+
+  - id: education.certification
+    name: Certification
+    parent: education
+    active: true
+
+  - id: education.course
+    name: Course
+    parent: education
+    active: true
+
+  - id: education.bootcamp
+    name: Bootcamp
+    parent: education
+    active: true
+
+  - id: education.training
+    name: Training
+    parent: education
+    active: true
+
+  - id: education.professional_program
+    name: Professional Program
+    parent: education
+    active: true
+
+  - id: education.scholarship
+    name: Scholarship
+    parent: education
+    active: true
+
+  - id: events
+    name: EVENTS
+    parent: opportunity
+    active: true
+
+  - id: events.conference
+    name: Conference
+    parent: events
+    active: true
+
+  - id: events.meetup
+    name: Meetup
+    parent: events
+    active: true
+
+  - id: events.workshop
+    name: Workshop
+    parent: events
+    active: true
+
+  - id: events.webinar
+    name: Webinar
+    parent: events
+    active: true
+
+  - id: events.career_fair
+    name: Career Fair
+    parent: events
+    active: true
+
+  - id: events.networking
+    name: Networking
+    parent: events
+    active: true
+
+  - id: news
+    name: NEWS
+    parent: opportunity
+    active: true
+
+  - id: news.technology
+    name: Technology
+    parent: news
+    active: true
+
+  - id: news.cybersecurity
+    name: Cybersecurity
+    parent: news
+    active: true
+
+  - id: news.government
+    name: Government
+    parent: news
+    active: true
+
+  - id: news.policy
+    name: Policy
+    parent: news
+    active: true
+
+  - id: news.international_affairs
+    name: International Affairs
+    parent: news
+    active: true

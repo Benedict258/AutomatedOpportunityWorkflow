@@ -1,0 +1,70 @@
+nodes:
+  - id: event
+    name: EVENT
+    parent: null
+    active: true
+
+  - id: event.conference
+    name: Conference
+    parent: event
+    active: true
+
+  - id: event.career_fair
+    name: Career Fair
+    parent: event
+    active: true
+
+  - id: event.hackathon
+    name: Hackathon
+    parent: event
+    active: true
+
+  - id: event.ctf
+    name: CTF
+    parent: event
+    active: true
+
+  - id: event.workshop
+    name: Workshop
+    parent: event
+    active: true
+
+  - id: event.webinar
+    name: Webinar
+    parent: event
+    active: true
+
+  - id: event.meetup
+    name: Meetup
+    parent: event
+    active: true
+
+  - id: event.networking_session
+    name: Networking Session
+    parent: event
+    active: true
+
+  - id: event.research_seminar
+    name: Research Seminar
+    parent: event
+    active: true
+
+  - id: event.policy_forum
+    name: Policy Forum
+    parent: event
+    active: true
+
+  - id: event.government_event
+    name: Government Event
+    parent: event
+    active: true
+
+  - id: event.professional_association_event
+    name: Professional Association Event
+    parent: event
+    active: true
+
+  - id: event.community_event
+    name: Community Event
+    parent: event
+    active: true
