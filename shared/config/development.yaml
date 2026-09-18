@@ -1,0 +1,17 @@
+# Development overrides
+# Inherits from default.yaml and overrides specific values for local development
+
+sources:
+  max_items_per_source: 20
+  freshness_days: 7
+
+notifications:
+  schedule:
+    enabled: false
+
+feature_flags:
+  notification_enabled: false
+
+retry:
+  max_attempts: 2
+  base_delay_ms: 500

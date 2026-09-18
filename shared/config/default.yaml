@@ -1,0 +1,55 @@
+# Application Business Configuration
+# This file contains non-secret application configuration.
+# Secrets must NOT be placed here - use .env files instead.
+
+app:
+  name: AutomatedOpportunityWorkflow
+  version: 0.1.0
+
+matching:
+  weights:
+    semantic: 0.4
+    taxonomy: 0.3
+    recency: 0.2
+    source_trust: 0.1
+  thresholds:
+    min_score: 0.6
+    high_confidence: 0.85
+
+sources:
+  enabled:
+    - techcrunch
+    - arxiv
+    - usajobs
+  max_items_per_source: 100
+  freshness_days: 30
+
+notifications:
+  schedule:
+    enabled: true
+    timezone: UTC
+    batch_times:
+      - "09:00"
+      - "17:00"
+  channels:
+    email: true
+    slack: false
+
+feature_flags:
+  extraction_enabled: true
+  classification_enabled: true
+  matching_enabled: true
+  notification_enabled: true
+
+opportunity_limits:
+  max_per_user: 50
+  max_batch_size: 100
+
+freshness:
+  stale_days: 60
+  archive_days: 365
+
+retry:
+  max_attempts: 3
+  base_delay_ms: 1000
+  backoff_factor: 2

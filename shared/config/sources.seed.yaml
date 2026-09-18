@@ -1,0 +1,134 @@
+# Source Registry Seed Data
+# Example sources across different categories for STEP 6 implementation
+# These are NOT Peter's personal sources - sample public registries
+
+sources:
+  - source_id: gov_usajobs_001
+    name: USAJobs
+    organization: U.S. Office of Personnel Management
+    category: GOVERNMENT
+    geography: US
+    source_type: API
+    access_method: PUBLIC
+    api_endpoint: https://data.usajobs.gov/api/search
+    authentication:
+      type: API_KEY
+      requiresKey: true
+    rate_limit:
+      requestsPerMinute: 5
+      requestsPerHour: 1000
+    cost: FREE
+    reliability: 0.95
+    priority: 90
+    enabled: true
+    metadata:
+      refreshFrequencyMinutes: 1440
+      pagination:
+        type: offset
+        pageSize: 100
+      termsRestrictions: U.S. government data - public domain
+      healthStatus: HEALTHY
+      sourceCapabilities:
+        pagination: true
+        filtering: true
+        fullTextSearch: true
+      tags: [federal, jobs]
+
+  - source_id: research_arxiv_001
+    name: arXiv
+    organization: Cornell University
+    category: RESEARCH
+    geography: GLOBAL
+    source_type: API
+    access_method: PUBLIC
+    api_endpoint: http://export.arxiv.org/api/query
+    authentication:
+      type: PUBLIC
+    rate_limit:
+      requestsPerHour: 1000
+    cost: FREE
+    reliability: 0.98
+    priority: 70
+    enabled: true
+    metadata:
+      refreshFrequencyMinutes: 360
+      termsRestrictions: Open access preprint repository
+      healthStatus: HEALTHY
+      sourceCapabilities:
+        pagination: true
+        filtering: true
+      tags: [preprint, cs, physics]
+
+  - source_id: employment_linkedin_001
+    name: LinkedIn Jobs
+    organization: LinkedIn Corporation
+    category: EMPLOYMENT
+    geography: GLOBAL
+    source_type: API
+    access_method: OAUTH
+    api_endpoint: https://api.linkedin.com/v2/jobPostings
+    authentication:
+      type: OAUTH
+      requiresKey: true
+      oauthScopes: [r_litecompany, r_basicprofile]
+    rate_limit:
+      requestsPerMinute: 100
+    cost: FREEMIUM
+    reliability: 0.85
+    priority: 80
+    enabled: true
+    metadata:
+      refreshFrequencyMinutes: 60
+      pagination:
+        type: cursor
+      termsRestrictions: Subject to LinkedIn API terms and rate limits
+      healthStatus: HEALTHY
+      sourceCapabilities:
+        pagination: true
+        filtering: true
+        realTimeUpdates: true
+      tags: [jobs, professional]
+
+  - source_id: fellowship_rothschild_001
+    name: Rothschild Foundation Fellowship
+    organization: Rothschild Foundation
+    category: FELLOWSHIP
+    geography: UK
+    source_type: RSS
+    access_method: PUBLIC
+    api_endpoint: https://www.rothschildfoundation.org.uk/feed
+    authentication:
+      type: PUBLIC
+    cost: FREE
+    reliability: 0.75
+    priority: 60
+    enabled: false
+    metadata:
+      refreshFrequencyMinutes: 10080
+      termsRestrictions: Public RSS feed
+      healthStatus: UNKNOWN
+      sourceCapabilities:
+        pagination: false
+      tags: [fellowship, uk]
+
+  - source_id: news_techcrunch_001
+    name: TechCrunch
+    organization: TechCrunch
+    category: NEWS
+    geography: GLOBAL
+    source_type: RSS
+    access_method: PUBLIC
+    api_endpoint: https://techcrunch.com/feed/
+    authentication:
+      type: PUBLIC
+    cost: FREE
+    reliability: 0.90
+    priority: 65
+    enabled: true
+    metadata:
+      refreshFrequencyMinutes: 180
+      termsRestrictions: RSS usage per site terms
+      healthStatus: HEALTHY
+      sourceCapabilities:
+        pagination: false
+      tags: [tech, startup]
