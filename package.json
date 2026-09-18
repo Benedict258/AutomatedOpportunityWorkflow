@@ -1,0 +1,22 @@
+﻿{
+  "name": "automated-opportunity-workflow",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Automated Opportunity Intelligence System - Phase 1 Foundation",
+  "workspaces": ["frontend", "backend", "shared"],
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\"",
+    "lint": "eslint . --ext .ts,.tsx",
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "build": "npm run build --workspaces"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "concurrently": "^8.2.0",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.0",
+    "typescript": "^5.3.3"
+  }
+}
