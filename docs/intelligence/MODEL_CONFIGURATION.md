@@ -1,0 +1,115 @@
+# Model Configuration
+
+## Environment Variables
+
+### Provider Configuration
+```
+MODEL_PROVIDER_<ID>_TYPE=openai-compatible|ollama
+MODEL_PROVIDER_<ID>_NAME=<display name>
+MODEL_PROVIDER_<ID>_BASE_URL=<api base url>
+MODEL_PROVIDER_<ID>_API_KEY=<api key>
+MODEL_PROVIDER_<ID>_ENABLED=true|false
+MODEL_PROVIDER_<ID>_PRIORITY=<integer>
+MODEL_PROVIDER_<ID>_RATE_LIMIT_RPM=<requests per minute>
+MODEL_PROVIDER_<ID>_RATE_LIMIT_TPM=<tokens per minute>
+```
+
+### Model Definitions
+```
+MODEL_<MODEL_ID>_PROVIDER=<provider_id>
+MODEL_<MODEL_ID>_NAME=<model name on provider>
+MODEL_<MODEL_ID>_CAPABILITIES=text-generation,structured-generation,embeddings,reranking
+MODEL_<MODEL_ID>_ENABLED=true|false
+MODEL_<MODEL_ID>_CONTEXT=<context length>
+MODEL_<MODEL_ID>_DIMENSIONS=<embedding dimensions>
+MODEL_<MODEL_ID>_TEMPERATURE=<0-2>
+MODEL_<MODEL_ID>_MAX_TOKENS=<integer>
+MODEL_<MODEL_ID>_TIMEOUT_MS=<milliseconds>
+MODEL_<MODEL_ID>_MAX_RETRIES=<integer>
+MODEL_<MODEL_ID>_FALLBACK=<fallback model id>
+```
+
+### Default Model Assignments
+```
+MODEL_DEFAULT_EXTRACTION=<model_id>
+MODEL_DEFAULT_CLASSIFICATION=<model_id>
+MODEL_DEFAULT_EMBEDDING=<model_id>
+MODEL_DEFAULT_REASONING=<model_id>
+MODEL_DEFAULT_MATCHING=<model_id>
+MODEL_DEFAULT_RERANKING=<model_id>
+```
+
+## Example: OpenAI
+
+```env
+MODEL_PROVIDER_OPENAI_ID=openai
+MODEL_PROVIDER_OPENAI_NAME=OpenAI
+MODEL_PROVIDER_OPENAI_TYPE=openai-compatible
+MODEL_PROVIDER_OPENAI_BASE_URL=https://api.openai.com/v1
+MODEL_PROVIDER_OPENAI_API_KEY=sk-...
+MODEL_PROVIDER_OPENAI_ENABLED=true
+MODEL_PROVIDER_OPENAI_PRIORITY=1
+MODEL_PROVIDER_OPENAI_RATE_LIMIT_RPM=60
+MODEL_PROVIDER_OPENAI_RATE_LIMIT_TPM=150000
+
+MODEL_GPT4O_MINI_PROVIDER=openai
+MODEL_GPT4O_MINI_NAME=gpt-4o-mini
+MODEL_GPT4O_MINI_CAPABILITIES=text-generation,structured-generation
+MODEL_GPT4O_MINI_ENABLED=true
+MODEL_GPT4O_MINI_CONTEXT=128000
+MODEL_GPT4O_MINI_TEMPERATURE=0.1
+MODEL_GPT4O_MINI_MAX_TOKENS=4096
+
+MODEL_EMBED_3_SMALL_PROVIDER=openai
+MODEL_EMBED_3_SMALL_NAME=text-embedding-3-small
+MODEL_EMBED_3_SMALL_CAPABILITIES=embeddings
+MODEL_EMBED_3_SMALL_ENABLED=true
+MODEL_EMBED_3_SMALL_DIMENSIONS=1536
+
+MODEL_DEFAULT_EXTRACTION=gpt-4o-mini
+MODEL_DEFAULT_CLASSIFICATION=gpt-4o-mini
+MODEL_DEFAULT_EMBEDDING=text-embedding-3-small
+MODEL_DEFAULT_REASONING=gpt-4o-mini
+MODEL_DEFAULT_MATCHING=text-embedding-3-small
+```
+
+## Example: Ollama (Local)
+
+```env
+MODEL_PROVIDER_OLLAMA_ID=ollama
+MODEL_PROVIDER_OLLAMA_NAME=Ollama Local
+MODEL_PROVIDER_OLLAMA_TYPE=ollama
+MODEL_PROVIDER_OLLAMA_BASE_URL=http://localhost:11434
+MODEL_PROVIDER_OLLAMA_ENABLED=true
+MODEL_PROVIDER_OLLAMA_PRIORITY=2
+
+MODEL_LLAMA31_8B_PROVIDER=ollama
+MODEL_LLAMA31_8B_NAME=llama3.1:8b
+MODEL_LLAMA31_8B_CAPABILITIES=text-generation,structured-generation
+MODEL_LLAMA31_8B_ENABLED=true
+MODEL_LLAMA31_8B_CONTEXT=131072
+MODEL_LLAMA31_8B_TEMPERATURE=0.1
+MODEL_LLAMA31_8B_MAX_TOKENS=4096
+
+MODEL_NOMIC_EMBED_PROVIDER=ollama
+MODEL_NOMIC_EMBED_NAME=nomic-embed-text
+MODEL_NOMIC_EMBED_CAPABILITIES=embeddings
+MODEL_NOMIC_EMBED_ENABLED=true
+MODEL_NOMIC_EMBED_DIMENSIONS=768
+
+MODEL_DEFAULT_EXTRACTION=llama3.1:8b
+MODEL_DEFAULT_CLASSIFICATION=llama3.1:8b
+MODEL_DEFAULT_EMBEDDING=nomic-embed-text
+MODEL_DEFAULT_REASONING=llama3.1:8b
+MODEL_DEFAULT_MATCHING=nomic-embed-text
+```
+
+## Configuration Loading
+
+The configuration is loaded from:
+1. `shared/src/config/default.yaml` (base)
+2. `shared/src/config/{NODE_ENV}.yaml` (environment override)
+3. `CONFIG_*` environment variables (business config override)
+4. `MODEL_*` environment variables (model config)
+
+See `shared/src/config/model-loader.ts` for loading logic.

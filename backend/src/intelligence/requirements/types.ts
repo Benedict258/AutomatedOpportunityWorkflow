@@ -45,6 +45,22 @@ export interface Requirement {
   extractedAt: string;
 }
 
+export interface RequirementWarning {
+  code: string;
+  message: string;
+  field?: string;
+  severity: 'low' | 'medium' | 'high';
+  extractor?: string;
+}
+
+export interface RequirementError {
+  code: string;
+  message: string;
+  field?: string;
+  recoverable: boolean;
+  extractor?: string;
+}
+
 export interface RequirementExtractionResult {
   requirements: Requirement[];
   summary: {
@@ -53,4 +69,7 @@ export interface RequirementExtractionResult {
   };
   sourceId: string;
   extractedAt: string;
+  overallConfidence?: number;
+  warnings?: RequirementWarning[];
+  errors?: RequirementError[];
 }
