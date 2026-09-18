@@ -1,0 +1,24 @@
+Step 11 — Failure Handling Reliability Observability
+Repository: AutomatedOpportunityWorkflow
+Date: 2026-09-18
+
+Created directory: backend/src/discovery/reliability
+
+Files created:
+1. types.ts
+2. retry-manager.ts
+3. circuit-breaker.ts
+4. error-classification.ts
+5. observability.ts
+6. index.ts
+7. RELIABILITY_REPORT.md
+8. IMPLEMENTATION_SUMMARY.txt
+
+No external dependencies used.
+
+All modules implement:
+- ReliabilityEvent, RetryPolicy, CircuitBreakerState types
+- Exponential backoff with jitter and max attempts
+- Source-level circuit breaker with state machine
+- Error classification: transient, permanent, rate-limit, auth
+- Observability hooks for metrics, logs, traces

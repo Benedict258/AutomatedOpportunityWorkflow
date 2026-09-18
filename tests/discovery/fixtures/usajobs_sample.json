@@ -1,0 +1,1 @@
+{"source":"USAJOBS","sourceId":"usajobs_federal_jobs","collectedAt":"2025-09-18T10:00:00Z","documents":[{"externalId":"12345678","rawData":{"PositionID":"12345678","PositionTitle":"Software Engineer"}},{"externalId":"87654321","rawData":{"PositionID":"87654321","PositionTitle":"Data Scientist"}}],"metrics":{"documentsCollected":2}}

@@ -1,0 +1,30 @@
+templates:
+  - id: taxonomy_driven_base
+    name: Taxonomy Driven Base
+    family: software_engineering
+    description: Base template for taxonomy-driven queries
+    version: '1.0.0'
+    active: true
+    baseFilters:
+      taxonomyNodes: []
+    parameters: ['taxonomyNodes', 'keywords']
+  - id: profile_aware_skills
+    name: Profile Aware Skills
+    family: software_engineering
+    description: Query filtered by user profile skills and interests
+    version: '1.0.0'
+    active: true
+    baseFilters:
+      profileSkills: []
+      profileInterests: []
+    parameters: ['profileSkills', 'profileInterests']
+  - id: geographic_remote
+    name: Geographic and Remote
+    family: software_engineering
+    description: Filter by geography and remote work options
+    version: '1.0.0'
+    active: true
+    baseFilters:
+      geographic:
+        remoteAllowed: false
+    parameters: ['countries', 'regions', 'remote']
