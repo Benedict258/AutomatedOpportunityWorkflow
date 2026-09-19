@@ -43,20 +43,4 @@ export async function registerRoutes(fastify: FastifyInstance): Promise<void> {
     // Webhook routes (with HMAC verification)
     await fastify.register(webhookRoutes);
   }, { prefix: '' });
-
-  // 404 handler for API routes
-  fastify.setNotFoundHandler((request, reply) => {
-    if (request.url.startsWith('/api/') || request.url.startsWith('/health')) {
-      reply.code(404).send({
-        error: {
-          code: 'NOT_FOUND',
-          title: 'Not Found',
-          message: `Route ${request.method} ${request.url} not found`,
-          status: 404,
-          requestId: request.requestId,
-          instance: request.url,
-        },
-      });
-    }
-  });
 }

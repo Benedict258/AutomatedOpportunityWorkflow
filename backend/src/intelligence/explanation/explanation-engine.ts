@@ -12,4 +12,10 @@ export class ExplanationEngine {
       evidenceReferences: [],
     };
   }
+
+  async generate(input: any): Promise<Explanation> {
+    return this.explain(input);
+  }
 }
+
+export const realExplanationEngine = new ExplanationEngine();

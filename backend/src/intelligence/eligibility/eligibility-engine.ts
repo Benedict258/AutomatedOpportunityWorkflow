@@ -99,4 +99,28 @@ export class EligibilityEngine implements IEligibilityEngine {
     if (!handler) throw new Error(`No handler for ${req.type}`);
     return handler(context.candidate, req, context);
   }
+
+  assess(opportunity: any, candidate: any): EligibilityResult {
+    const context: EligibilityContext = {
+      candidate: {
+        id: candidate?.id || 'unknown',
+        education: candidate?.education || [],
+        experience: candidate?.experience || [],
+        skills: candidate?.skills || [],
+        certifications: candidate?.certifications || [],
+        location: candidate?.location || '',
+        citizenship: candidate?.citizenship || '',
+        workAuthorization: candidate?.workAuthorization || '',
+        securityClearance: candidate?.securityClearance || '',
+      },
+      opportunity: {
+        id: opportunity?.id || 'unknown',
+        requirements: opportunity?.requirements || [],
+        deadline: opportunity?.deadline,
+        location: opportunity?.location || '',
+        remoteStatus: opportunity?.remoteStatus || 'unknown',
+      },
+    };
+    return this.evaluate(context);
+  }
 }

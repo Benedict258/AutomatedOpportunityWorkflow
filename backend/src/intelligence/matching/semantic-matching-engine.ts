@@ -16,4 +16,21 @@ export class SemanticMatchingEngine implements SemanticMatcher {
       overall: 0,
     };
   }
+
+  async computeMatch(candidate: any, opportunity: any): Promise<any> {
+    const emptyFactor = (name: string) => ({ name, score: 0, confidence: 0, evidence: [] });
+    return {
+      factors: {
+        skillSimilarity: 0,
+        careerSimilarity: 0,
+        experienceSimilarity: 0,
+        technologySimilarity: 0,
+        domainSimilarity: 0,
+      },
+      overall: 0,
+      confidence: 0,
+    };
+  }
 }
+
+export const realMatchingEngine = new SemanticMatchingEngine();

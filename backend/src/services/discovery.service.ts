@@ -1,5 +1,6 @@
 import { DiscoveryEngine } from '../discovery/discovery-engine';
-import { RunCoordinator, InMemoryRunPersistence } from '../discovery/run-management/run-coordinator';
+import { RunCoordinator } from '../discovery/run-management/run-coordinator';
+import { InMemoryRunPersistence } from '../discovery/run-management/run-persistence';
 import { PipelineOrchestrator } from '../discovery/pipeline-orchestrator';
 import { 
   CreateJobOptions, 

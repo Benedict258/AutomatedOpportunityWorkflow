@@ -60,25 +60,4 @@ export async function deadlineRoutes(fastify: FastifyInstance): Promise<void> {
 
     return createListResponse(deadlines, page, limit, total, '/api/v1/deadlines/upcoming', request);
   });
-
-  // Get deadline details for specific opportunity
-  fastify.get('/api/v1/opportunities/:id/deadline', {
-    preHandler: [authenticateRequest, validateParams(z.object({ id: uuidSchema }))],
-    schema: {
-      tags: ['Deadlines'],
-      summary: 'Get deadline details for a specific opportunity',
-      params: z.object({ id: uuidSchema }),
-      response: {
-        200: { type: 'object', properties: { data: z.object({}) } },
-        404: { type: 'object', properties: { error: z.object({}) } },
-      },
-    },
-  }, async (request, reply) => {
-    const { id } = request.params as { id: string };
-    const deadline = await opportunityService.getDeadlineDetails(id);
-    if (!deadline) {
-      throw new AppError('Opportunity not found', 404, 'NOT_FOUND');
-    }
-    return createSingleResponse(deadline);
-  });
 }
