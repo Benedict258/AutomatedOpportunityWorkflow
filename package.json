@@ -1,10 +1,9 @@
-﻿{
+{
   "name": "automated-opportunity-workflow",
   "private": true,
   "version": "0.1.0",
   "description": "Automated Opportunity Intelligence System - Phase 1 Foundation",
-  "workspaces": ["frontend", "backend", "shared"],
-"scripts": {
+  "scripts": {
     "dev": "concurrently \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\"",
     "lint": "eslint . --ext .ts,.tsx",
     "format": "prettier --write .",
