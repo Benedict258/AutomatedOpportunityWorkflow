@@ -1,44 +1,43 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { DiscoveryService } from '@/services/discovery.service.js';
-import { createTestDiscoveryJob, createTestDiscoveryRun } from '@tests/factories.js';
 
-// Mock the discovery engine
-vi.mock('@/discovery/discovery-engine', () => {
-  return {
-    DiscoveryEngine: vi.fn().mockImplementation(() => ({
-      createJob: vi.fn().mockResolvedValue(createTestDiscoveryJob()),
-      getJob: vi.fn().mockResolvedValue(createTestDiscoveryJob()),
-      executeJob: vi.fn().mockResolvedValue(createTestDiscoveryRun()),
-    })),
-  };
-});
-
-// Mock the run coordinator
-vi.mock('@/discovery/run-management/run-coordinator', () => {
-  return {
-    RunCoordinator: vi.fn().mockImplementation(() => ({
-      scheduleRun: vi.fn().mockResolvedValue({ runId: 'run-123' }),
-      startRun: vi.fn().mockResolvedValue(createTestDiscoveryRun({ status: 'RUNNING' })),
-      getRunStatus: vi.fn().mockResolvedValue(createTestDiscoveryRun()),
-      cancelRun: vi.fn().mockResolvedValue(createTestDiscoveryRun({ status: 'CANCELLED' })),
-      pauseRun: vi.fn().mockResolvedValue(createTestDiscoveryRun({ status: 'PAUSED' })),
-      resumeRun: vi.fn().mockResolvedValue(createTestDiscoveryRun({ status: 'RUNNING' })),
-      pollRunStatus: vi.fn().mockResolvedValue(createTestDiscoveryRun({ status: 'SUCCEEDED' })),
-      getPersistence: vi.fn().mockReturnValue({
-        listRuns: vi.fn().mockResolvedValue([createTestDiscoveryRun()]),
-      }),
-    }),
-  };
-});
-
-vi.mock('@/discovery/pipeline-orchestrator');
 vi.mock('@/utils/logger.js', () => ({
-  logger: {
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-  },
+  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
+
+const mockJob = { id: 'job-123', status: 'CREATED', sourceIds: ['src-1'], category: 'TECH', createdAt: new Date().toISOString() };
+const mockRun = { id: 'run-123', status: 'SUCCEEDED', jobId: 'job-123', createdAt: new Date().toISOString() };
+
+vi.mock('@/discovery/pipeline-orchestrator', () => ({
+  PipelineOrchestrator: vi.fn().mockImplementation(() => ({})),
+}));
+
+vi.mock('@/discovery/run-management/run-coordinator', () => ({
+  RunCoordinator: vi.fn().mockImplementation(() => ({
+    scheduleRun: vi.fn().mockResolvedValue({ runId: 'run-123' }),
+    startRun: vi.fn().mockResolvedValue({ ...mockRun, status: 'RUNNING' }),
+    getRunStatus: vi.fn().mockResolvedValue(mockRun),
+    cancelRun: vi.fn().mockResolvedValue({ ...mockRun, status: 'CANCELLED' }),
+    pauseRun: vi.fn().mockResolvedValue({ ...mockRun, status: 'PAUSED' }),
+    resumeRun: vi.fn().mockResolvedValue({ ...mockRun, status: 'RUNNING' }),
+    pollRunStatus: vi.fn().mockResolvedValue({ ...mockRun, status: 'SUCCEEDED' }),
+    getPersistence: vi.fn().mockReturnValue({
+      listRuns: vi.fn().mockResolvedValue([mockRun]),
+    }),
+  })),
+  InMemoryRunPersistence: vi.fn().mockImplementation(() => ({
+    listRuns: vi.fn().mockResolvedValue([mockRun]),
+  })),
+}));
+
+vi.mock('@/discovery/discovery-engine', () => ({
+  DiscoveryEngine: vi.fn().mockImplementation(() => ({
+    createJob: vi.fn().mockResolvedValue(mockJob),
+    getJob: vi.fn().mockResolvedValue(mockJob),
+    executeJob: vi.fn().mockResolvedValue(mockRun),
+  })),
+}));
+
+const { DiscoveryService } = await import('@/services/discovery.service.js');
 
 describe('DiscoveryService', () => {
   beforeEach(() => {

@@ -71,6 +71,10 @@ export function createMockReply(overrides: Partial<{
         }),
       };
     }),
+    code: vi.fn((code: number) => {
+      statusCode = code;
+      return reply;
+    }),
     header: vi.fn((name: string, value: string) => {
       headers[name.toLowerCase()] = value;
       return {
@@ -325,6 +329,7 @@ export function createTestVerificationRun(overrides: Partial<{
 export function createTestReprocessingRun(overrides: Partial<{
   id: string;
   status: string;
+  forceReprocess: boolean;
 }> = {}) {
   const now = new Date().toISOString();
   return {
@@ -336,7 +341,7 @@ export function createTestReprocessingRun(overrides: Partial<{
     results: null,
     error: null,
     triggeredBy: 'test',
-    forceReprocess: false,
+    forceReprocess: overrides.forceReprocess ?? false,
     metadata: {},
     createdAt: now,
     updatedAt: now,

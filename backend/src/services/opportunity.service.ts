@@ -1,7 +1,7 @@
 import { getPool, executeQuery, executeTransaction } from '../db/connection';
-import { OpportunityPersister } from '../../persistence/opportunity-persister';
-import { VersionManager } from '../../discovery/versioning/version-manager';
-import { TimingIntelligenceEngine } from '../../intelligence/timing/timing-intelligence-engine';
+import { OpportunityPersister } from '../persistence/opportunity-persister';
+import { VersionManager } from '../discovery/versioning/version-manager';
+import { TimingIntelligenceEngine } from '../intelligence/timing/timing-intelligence-engine';
 import { 
   Opportunity, 
   CreateOpportunity, 

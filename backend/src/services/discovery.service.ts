@@ -1,14 +1,14 @@
-import { DiscoveryEngine } from '../../discovery/discovery-engine';
-import { RunCoordinator, InMemoryRunPersistence } from '../../discovery/run-management/run-coordinator';
-import { PipelineOrchestrator } from '../../discovery/pipeline-orchestrator';
+import { DiscoveryEngine } from '../discovery/discovery-engine';
+import { RunCoordinator, InMemoryRunPersistence } from '../discovery/run-management/run-coordinator';
+import { PipelineOrchestrator } from '../discovery/pipeline-orchestrator';
 import { 
   CreateJobOptions, 
   DiscoveryJob, 
   DiscoveryRun, 
   DiscoveryRunStatus,
   DiscoveryEngineOptions 
-} from '../../discovery/types';
-import { RunScheduleRequest, RunCancelRequest, RunPollOptions, DiscoveryRunRecord, RunStatus } from '../../discovery/run-management/types';
+} from '../discovery/types';
+import { RunScheduleRequest, RunCancelRequest, RunPollOptions, DiscoveryRunRecord, RunStatus } from '../discovery/run-management/types';
 import { logger } from '../utils/logger.js';
 
 export class DiscoveryService {
