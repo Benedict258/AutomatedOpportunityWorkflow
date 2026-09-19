@@ -11,6 +11,7 @@ import { validateBody, validateParams, validateQuery } from '../middleware/valid
 import { authenticateRequest } from '../middleware/auth';
 import { createSingleResponse, createListResponse } from '../utils/api-envelope';
 import { AppError } from '../middleware/error';
+import { zodToJson } from '../utils/schema-converter';
 
 export async function newsRoutes(fastify: FastifyInstance): Promise<void> {
   const newsService = getNewsService();
@@ -21,9 +22,9 @@ export async function newsRoutes(fastify: FastifyInstance): Promise<void> {
     schema: {
       tags: ['News'],
       summary: 'Create a news item',
-      body: createNewsItemSchema,
+      body: zodToJson(createNewsItemSchema),
       response: {
-        201: { type: 'object', properties: { data: newsItemSchema } },
+        201: { type: 'object', properties: { data: zodToJson(newsItemSchema) } },
       },
     },
   }, async (request, reply) => {
@@ -37,9 +38,9 @@ export async function newsRoutes(fastify: FastifyInstance): Promise<void> {
     schema: {
       tags: ['News'],
       summary: 'List news items',
-      query: newsFiltersSchema,
+      query: zodToJson(newsFiltersSchema),
       response: {
-        200: { type: 'object', properties: { data: z.array(newsItemSchema), meta: z.object({}), links: z.object({}).optional() } },
+        200: { type: 'object', properties: { data: zodToJson(z.array(newsItemSchema)), meta: zodToJson(z.object({})), links: zodToJson(z.object({}).optional()) } },
       },
     },
   }, async (request, reply) => {
@@ -54,10 +55,10 @@ export async function newsRoutes(fastify: FastifyInstance): Promise<void> {
     schema: {
       tags: ['News'],
       summary: 'Get news item by ID',
-      params: z.object({ id: z.string().uuid() }),
+      params: zodToJson(z.object({ id: z.string().uuid() })),
       response: {
-        200: { type: 'object', properties: { data: newsItemSchema } },
-        404: { type: 'object', properties: { error: z.object({}) } },
+        200: { type: 'object', properties: { data: zodToJson(newsItemSchema) } },
+        404: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -75,11 +76,11 @@ export async function newsRoutes(fastify: FastifyInstance): Promise<void> {
     schema: {
       tags: ['News'],
       summary: 'Update a news item',
-      params: z.object({ id: z.string().uuid() }),
-      body: updateNewsItemSchema,
+      params: zodToJson(z.object({ id: z.string().uuid() })),
+      body: zodToJson(updateNewsItemSchema),
       response: {
-        200: { type: 'object', properties: { data: newsItemSchema } },
-        404: { type: 'object', properties: { error: z.object({}) } },
+        200: { type: 'object', properties: { data: zodToJson(newsItemSchema) } },
+        404: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -97,10 +98,10 @@ export async function newsRoutes(fastify: FastifyInstance): Promise<void> {
     schema: {
       tags: ['News'],
       summary: 'Delete a news item',
-      params: z.object({ id: z.string().uuid() }),
+      params: zodToJson(z.object({ id: z.string().uuid() })),
       response: {
         204: { type: 'null' },
-        404: { type: 'object', properties: { error: z.object({}) } },
+        404: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -118,10 +119,10 @@ export async function newsRoutes(fastify: FastifyInstance): Promise<void> {
     schema: {
       tags: ['News'],
       summary: 'Get related opportunities for a news item',
-      params: z.object({ id: z.string().uuid() }),
+      params: zodToJson(z.object({ id: z.string().uuid() })),
       response: {
-        200: { type: 'object', properties: { data: z.array(z.object({})) } },
-        404: { type: 'object', properties: { error: z.object({}) } },
+        200: { type: 'object', properties: { data: zodToJson(z.array(z.object({}))) } },
+        404: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {

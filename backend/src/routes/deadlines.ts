@@ -5,6 +5,7 @@ import { paginationSchema, uuidSchema } from '../schemas/discovery';
 import { validateParams, validateQuery } from '../middleware/validation';
 import { authenticateRequest } from '../middleware/auth';
 import { createSingleResponse, createListResponse } from '../utils/api-envelope';
+import { zodToJson } from '../utils/schema-converter';
 import { AppError } from '../middleware/error';
 
 const deadlineQuerySchema = paginationSchema.extend({
@@ -22,9 +23,9 @@ export async function deadlineRoutes(fastify: FastifyInstance): Promise<void> {
     schema: {
       tags: ['Deadlines'],
       summary: 'Get upcoming deadlines',
-      query: deadlineQuerySchema,
+      query: zodToJson(deadlineQuerySchema),
       response: {
-        200: { type: 'object', properties: { data: z.array(z.object({})), meta: z.object({}), links: z.object({}).optional() } },
+        200: { type: 'object', properties: { data: zodToJson(z.array(z.object({}))), meta: zodToJson(z.object({})), links: zodToJson(z.object({}).optional()) } },
       },
     },
   }, async (request, reply) => {

@@ -16,6 +16,7 @@ import { authenticateRequest } from '../middleware/auth';
 import { createSingleResponse, createListResponse } from '../utils/api-envelope';
 import { AppError } from '../middleware/error';
 import { logger } from '../utils/logger';
+import { zodToJson } from '../utils/schema-converter';
 
 export async function discoveryRoutes(fastify: FastifyInstance): Promise<void> {
   // Initialize discovery service with dependencies
@@ -31,9 +32,9 @@ export async function discoveryRoutes(fastify: FastifyInstance): Promise<void> {
       tags: ['Discovery'],
       summary: 'Create a discovery job',
       description: 'Creates a new discovery job template',
-      body: createJobOptionsSchema,
+      body: zodToJson(createJobOptionsSchema),
       response: {
-        201: { type: 'object', properties: { data: discoveryJobSchema } },
+        201: { type: 'object', properties: { data: zodToJson(discoveryJobSchema) } },
       },
     },
   }, async (request, reply) => {
@@ -47,10 +48,10 @@ export async function discoveryRoutes(fastify: FastifyInstance): Promise<void> {
     schema: {
       tags: ['Discovery'],
       summary: 'Get job details',
-      params: z.object({ jobId: uuidSchema }),
+      params: zodToJson(z.object({ jobId: uuidSchema })),
       response: {
-        200: { type: 'object', properties: { data: discoveryJobSchema } },
-        404: { type: 'object', properties: { error: z.object({}) } },
+        200: { type: 'object', properties: { data: zodToJson(discoveryJobSchema) } },
+        404: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -69,11 +70,11 @@ export async function discoveryRoutes(fastify: FastifyInstance): Promise<void> {
       tags: ['Discovery'],
       summary: 'Execute a discovery job',
       description: 'Creates and starts a discovery run for the job',
-      params: z.object({ jobId: uuidSchema }),
+      params: zodToJson(z.object({ jobId: uuidSchema })),
       response: {
-        201: { type: 'object', properties: { data: discoveryRunSchema } },
-        404: { type: 'object', properties: { error: z.object({}) } },
-        409: { type: 'object', properties: { error: z.object({}) } },
+        201: { type: 'object', properties: { data: zodToJson(discoveryRunSchema) } },
+        404: { type: 'object', properties: { error: zodToJson(z.object({})) } },
+        409: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -95,9 +96,9 @@ export async function discoveryRoutes(fastify: FastifyInstance): Promise<void> {
     schema: {
       tags: ['Discovery'],
       summary: 'Schedule a discovery run',
-      body: runScheduleRequestSchema,
+      body: zodToJson(runScheduleRequestSchema),
       response: {
-        201: { type: 'object', properties: { data: z.object({ runId: uuidSchema }) } },
+        201: { type: 'object', properties: { data: zodToJson(z.object({ runId: uuidSchema })) } },
       },
     },
   }, async (request, reply) => {
@@ -111,10 +112,10 @@ export async function discoveryRoutes(fastify: FastifyInstance): Promise<void> {
     schema: {
       tags: ['Discovery'],
       summary: 'Get discovery run status',
-      params: z.object({ runId: uuidSchema }),
+      params: zodToJson(z.object({ runId: uuidSchema })),
       response: {
-        200: { type: 'object', properties: { data: discoveryRunSchema } },
-        404: { type: 'object', properties: { error: z.object({}) } },
+        200: { type: 'object', properties: { data: zodToJson(discoveryRunSchema) } },
+        404: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -132,10 +133,10 @@ export async function discoveryRoutes(fastify: FastifyInstance): Promise<void> {
     schema: {
       tags: ['Discovery'],
       summary: 'Get discovery run results',
-      params: z.object({ runId: uuidSchema }),
+      params: zodToJson(z.object({ runId: uuidSchema })),
       response: {
-        200: { type: 'object', properties: { data: z.object({ run: discoveryRunSchema.nullable(), opportunities: z.array(z.unknown()) }) } },
-        404: { type: 'object', properties: { error: z.object({}) } },
+        200: { type: 'object', properties: { data: zodToJson(z.object({ run: discoveryRunSchema.nullable(), opportunities: z.array(z.unknown()) })) } },
+        404: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -153,12 +154,12 @@ export async function discoveryRoutes(fastify: FastifyInstance): Promise<void> {
     schema: {
       tags: ['Discovery'],
       summary: 'Cancel a discovery run',
-      params: z.object({ runId: uuidSchema }),
-      body: runCancelRequestSchema.omit({ runId: true }),
+      params: zodToJson(z.object({ runId: uuidSchema })),
+      body: zodToJson(runCancelRequestSchema.omit({ runId: true })),
       response: {
-        200: { type: 'object', properties: { data: discoveryRunSchema } },
-        404: { type: 'object', properties: { error: z.object({}) } },
-        409: { type: 'object', properties: { error: z.object({}) } },
+        200: { type: 'object', properties: { data: zodToJson(discoveryRunSchema) } },
+        404: { type: 'object', properties: { error: zodToJson(z.object({})) } },
+        409: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -181,11 +182,11 @@ export async function discoveryRoutes(fastify: FastifyInstance): Promise<void> {
     schema: {
       tags: ['Discovery'],
       summary: 'Pause a discovery run',
-      params: z.object({ runId: uuidSchema }),
+      params: zodToJson(z.object({ runId: uuidSchema })),
       response: {
-        200: { type: 'object', properties: { data: discoveryRunSchema } },
-        404: { type: 'object', properties: { error: z.object({}) } },
-        409: { type: 'object', properties: { error: z.object({}) } },
+        200: { type: 'object', properties: { data: zodToJson(discoveryRunSchema) } },
+        404: { type: 'object', properties: { error: zodToJson(z.object({})) } },
+        409: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -207,11 +208,11 @@ export async function discoveryRoutes(fastify: FastifyInstance): Promise<void> {
     schema: {
       tags: ['Discovery'],
       summary: 'Resume a paused discovery run',
-      params: z.object({ runId: uuidSchema }),
+      params: zodToJson(z.object({ runId: uuidSchema })),
       response: {
-        200: { type: 'object', properties: { data: discoveryRunSchema } },
-        404: { type: 'object', properties: { error: z.object({}) } },
-        409: { type: 'object', properties: { error: z.object({}) } },
+        200: { type: 'object', properties: { data: zodToJson(discoveryRunSchema) } },
+        404: { type: 'object', properties: { error: zodToJson(z.object({})) } },
+        409: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -233,12 +234,12 @@ export async function discoveryRoutes(fastify: FastifyInstance): Promise<void> {
     schema: {
       tags: ['Discovery'],
       summary: 'Poll discovery run status until completion',
-      params: z.object({ runId: uuidSchema }),
-      query: runPollOptionsSchema.omit({ runId: true }),
+      params: zodToJson(z.object({ runId: uuidSchema })),
+      query: zodToJson(runPollOptionsSchema.omit({ runId: true })),
       response: {
-        200: { type: 'object', properties: { data: discoveryRunSchema } },
-        404: { type: 'object', properties: { error: z.object({}) } },
-        408: { type: 'object', properties: { error: z.object({}) } },
+        200: { type: 'object', properties: { data: zodToJson(discoveryRunSchema) } },
+        404: { type: 'object', properties: { error: zodToJson(z.object({})) } },
+        408: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -269,9 +270,9 @@ export async function discoveryRoutes(fastify: FastifyInstance): Promise<void> {
     schema: {
       tags: ['Discovery'],
       summary: 'List discovery runs',
-      query: listRunsQuerySchema,
+      query: zodToJson(listRunsQuerySchema),
       response: {
-        200: { type: 'object', properties: { data: z.array(discoveryRunSchema), meta: z.object({}), links: z.object({}).optional() } },
+        200: { type: 'object', properties: { data: zodToJson(z.array(discoveryRunSchema)), meta: zodToJson(z.object({})), links: zodToJson(z.object({}).optional()) } },
       },
     },
   }, async (request, reply) => {

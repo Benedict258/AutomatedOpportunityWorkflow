@@ -11,6 +11,7 @@ import {
   reprocessingCompleteWebhookSchema,
 } from '../schemas/webhook';
 import { validateBody } from '../middleware/validation';
+import { zodToJson } from '../utils/schema-converter';
 import { verifyWebhookSignature } from '../middleware/auth';
 import { createSingleResponse } from '../utils/api-envelope';
 import { AppError } from '../middleware/error';
@@ -37,11 +38,11 @@ export async function webhookRoutes(fastify: FastifyInstance): Promise<void> {
       tags: ['Webhooks'],
       summary: 'News to Opportunity webhook',
       description: 'n8n callback when news item generates opportunity candidates',
-      body: discoveryCompleteWebhookSchema,
+      body: zodToJson(discoveryCompleteWebhookSchema),
       response: {
-        202: { type: 'object', properties: { data: z.object({ message: z.string() }) } },
-        401: { type: 'object', properties: { error: z.object({}) } },
-        409: { type: 'object', properties: { error: z.object({}) } },
+        202: { type: 'object', properties: { data: zodToJson(z.object({ message: z.string() })) } },
+        401: { type: 'object', properties: { error: zodToJson(z.object({})) } },
+        409: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -66,10 +67,10 @@ export async function webhookRoutes(fastify: FastifyInstance): Promise<void> {
       tags: ['Webhooks'],
       summary: 'High priority alert webhook',
       description: 'n8n callback for high-priority alerts (deadline soon, high match, etc.)',
-      body: highPriorityAlertWebhookSchema,
+      body: zodToJson(highPriorityAlertWebhookSchema),
       response: {
-        202: { type: 'object', properties: { data: z.object({ message: z.string() }) } },
-        401: { type: 'object', properties: { error: z.object({}) } },
+        202: { type: 'object', properties: { data: zodToJson(z.object({ message: z.string() })) } },
+        401: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -87,10 +88,10 @@ export async function webhookRoutes(fastify: FastifyInstance): Promise<void> {
       tags: ['Webhooks'],
       summary: 'Application tracking webhook',
       description: 'n8n callback for application status changes',
-      body: applicationTrackingWebhookSchema,
+      body: zodToJson(applicationTrackingWebhookSchema),
       response: {
-        202: { type: 'object', properties: { data: z.object({ message: z.string() }) } },
-        401: { type: 'object', properties: { error: z.object({}) } },
+        202: { type: 'object', properties: { data: zodToJson(z.object({ message: z.string() })) } },
+        401: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -108,10 +109,10 @@ export async function webhookRoutes(fastify: FastifyInstance): Promise<void> {
       tags: ['Webhooks'],
       summary: 'Manual discovery trigger webhook',
       description: 'n8n callback to manually trigger discovery',
-      body: discoveryManualTriggerSchema,
+      body: zodToJson(discoveryManualTriggerSchema),
       response: {
-        202: { type: 'object', properties: { data: z.object({ message: z.string(), jobId: z.string().optional() }) } },
-        401: { type: 'object', properties: { error: z.object({}) } },
+        202: { type: 'object', properties: { data: zodToJson(z.object({ message: z.string(), jobId: z.string().optional() })) } },
+        401: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -129,10 +130,10 @@ export async function webhookRoutes(fastify: FastifyInstance): Promise<void> {
       tags: ['Webhooks'],
       summary: 'Manual reprocessing trigger webhook',
       description: 'n8n callback to manually trigger reprocessing',
-      body: reprocessingManualTriggerSchema,
+      body: zodToJson(reprocessingManualTriggerSchema),
       response: {
-        202: { type: 'object', properties: { data: z.object({ message: z.string(), runId: z.string().optional() }) } },
-        401: { type: 'object', properties: { error: z.object({}) } },
+        202: { type: 'object', properties: { data: zodToJson(z.object({ message: z.string(), runId: z.string().optional() })) } },
+        401: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -150,10 +151,10 @@ export async function webhookRoutes(fastify: FastifyInstance): Promise<void> {
       tags: ['Webhooks'],
       summary: 'Verification complete webhook',
       description: 'n8n callback when verification run completes',
-      body: verificationCompleteWebhookSchema,
+      body: zodToJson(verificationCompleteWebhookSchema),
       response: {
-        202: { type: 'object', properties: { data: z.object({ message: z.string() }) } },
-        401: { type: 'object', properties: { error: z.object({}) } },
+        202: { type: 'object', properties: { data: zodToJson(z.object({ message: z.string() })) } },
+        401: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -171,10 +172,10 @@ export async function webhookRoutes(fastify: FastifyInstance): Promise<void> {
       tags: ['Webhooks'],
       summary: 'Reprocessing complete webhook',
       description: 'n8n callback when reprocessing run completes',
-      body: reprocessingCompleteWebhookSchema,
+      body: zodToJson(reprocessingCompleteWebhookSchema),
       response: {
-        202: { type: 'object', properties: { data: z.object({ message: z.string() }) } },
-        401: { type: 'object', properties: { error: z.object({}) } },
+        202: { type: 'object', properties: { data: zodToJson(z.object({ message: z.string() })) } },
+        401: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {

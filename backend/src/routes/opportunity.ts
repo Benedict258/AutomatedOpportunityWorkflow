@@ -13,6 +13,7 @@ import { validateBody, validateParams, validateQuery } from '../middleware/valid
 import { authenticateRequest } from '../middleware/auth';
 import { createSingleResponse, createListResponse } from '../utils/api-envelope';
 import { AppError } from '../middleware/error';
+import { zodToJson } from '../utils/schema-converter';
 
 export async function opportunityRoutes(fastify: FastifyInstance): Promise<void> {
   const opportunityService = getOpportunityService();
@@ -23,9 +24,9 @@ export async function opportunityRoutes(fastify: FastifyInstance): Promise<void>
     schema: {
       tags: ['Opportunities'],
       summary: 'Create an opportunity',
-      body: createOpportunitySchema,
+      body: zodToJson(createOpportunitySchema),
       response: {
-        201: { type: 'object', properties: { data: opportunitySchema } },
+        201: { type: 'object', properties: { data: zodToJson(opportunitySchema) } },
       },
     },
   }, async (request, reply) => {
@@ -39,9 +40,9 @@ export async function opportunityRoutes(fastify: FastifyInstance): Promise<void>
     schema: {
       tags: ['Opportunities'],
       summary: 'List opportunities',
-      query: opportunityFiltersSchema,
+      query: zodToJson(opportunityFiltersSchema),
       response: {
-        200: { type: 'object', properties: { data: z.array(opportunitySchema), meta: z.object({}), links: z.object({}).optional() } },
+        200: { type: 'object', properties: { data: zodToJson(z.array(opportunitySchema)), meta: zodToJson(z.object({})), links: zodToJson(z.object({}).optional()) } },
       },
     },
   }, async (request, reply) => {
@@ -56,10 +57,10 @@ export async function opportunityRoutes(fastify: FastifyInstance): Promise<void>
     schema: {
       tags: ['Opportunities'],
       summary: 'Get opportunity by ID',
-      params: z.object({ id: z.string().uuid() }),
+      params: zodToJson(z.object({ id: z.string().uuid() })),
       response: {
-        200: { type: 'object', properties: { data: opportunitySchema } },
-        404: { type: 'object', properties: { error: z.object({}) } },
+        200: { type: 'object', properties: { data: zodToJson(opportunitySchema) } },
+        404: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -77,11 +78,11 @@ export async function opportunityRoutes(fastify: FastifyInstance): Promise<void>
     schema: {
       tags: ['Opportunities'],
       summary: 'Update an opportunity',
-      params: z.object({ id: z.string().uuid() }),
-      body: updateOpportunitySchema,
+      params: zodToJson(z.object({ id: z.string().uuid() })),
+      body: zodToJson(updateOpportunitySchema),
       response: {
-        200: { type: 'object', properties: { data: opportunitySchema } },
-        404: { type: 'object', properties: { error: z.object({}) } },
+        200: { type: 'object', properties: { data: zodToJson(opportunitySchema) } },
+        404: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -99,10 +100,10 @@ export async function opportunityRoutes(fastify: FastifyInstance): Promise<void>
     schema: {
       tags: ['Opportunities'],
       summary: 'Delete an opportunity',
-      params: z.object({ id: z.string().uuid() }),
+      params: zodToJson(z.object({ id: z.string().uuid() })),
       response: {
         204: { type: 'null' },
-        404: { type: 'object', properties: { error: z.object({}) } },
+        404: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -121,10 +122,10 @@ export async function opportunityRoutes(fastify: FastifyInstance): Promise<void>
       tags: ['Opportunities'],
       summary: 'Get opportunity intelligence',
       description: 'Returns classification, requirements, eligibility, match score, and explanation',
-      params: z.object({ id: z.string().uuid() }),
+      params: zodToJson(z.object({ id: z.string().uuid() })),
       response: {
-        200: { type: 'object', properties: { data: opportunityIntelligenceSchema } },
-        404: { type: 'object', properties: { error: z.object({}) } },
+        200: { type: 'object', properties: { data: zodToJson(opportunityIntelligenceSchema) } },
+        404: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -142,10 +143,10 @@ export async function opportunityRoutes(fastify: FastifyInstance): Promise<void>
     schema: {
       tags: ['Opportunities'],
       summary: 'Get candidate matches for opportunity',
-      params: z.object({ id: z.string().uuid() }),
+      params: zodToJson(z.object({ id: z.string().uuid() })),
       response: {
-        200: { type: 'object', properties: { data: z.array(z.object({})) } },
-        404: { type: 'object', properties: { error: z.object({}) } },
+        200: { type: 'object', properties: { data: zodToJson(z.array(z.object({}))) } },
+        404: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -160,10 +161,10 @@ export async function opportunityRoutes(fastify: FastifyInstance): Promise<void>
     schema: {
       tags: ['Opportunities'],
       summary: 'Get opportunity version history',
-      params: z.object({ id: z.string().uuid() }),
+      params: zodToJson(z.object({ id: z.string().uuid() })),
       response: {
-        200: { type: 'object', properties: { data: z.array(opportunityVersionSchema) } },
-        404: { type: 'object', properties: { error: z.object({}) } },
+        200: { type: 'object', properties: { data: zodToJson(z.array(opportunityVersionSchema)) } },
+        404: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -178,10 +179,10 @@ export async function opportunityRoutes(fastify: FastifyInstance): Promise<void>
     schema: {
       tags: ['Opportunities'],
       summary: 'Trigger reprocessing for an opportunity',
-      params: z.object({ id: z.string().uuid() }),
+      params: zodToJson(z.object({ id: z.string().uuid() })),
       response: {
-        202: { type: 'object', properties: { data: z.object({ message: z.string() }) } },
-        404: { type: 'object', properties: { error: z.object({}) } },
+        202: { type: 'object', properties: { data: zodToJson(z.object({ message: z.string() })) } },
+        404: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -196,10 +197,10 @@ export async function opportunityRoutes(fastify: FastifyInstance): Promise<void>
     schema: {
       tags: ['Opportunities'],
       summary: 'Trigger verification for an opportunity',
-      params: z.object({ id: z.string().uuid() }),
+      params: zodToJson(z.object({ id: z.string().uuid() })),
       response: {
-        202: { type: 'object', properties: { data: z.object({ message: z.string() }) } },
-        404: { type: 'object', properties: { error: z.object({}) } },
+        202: { type: 'object', properties: { data: zodToJson(z.object({ message: z.string() })) } },
+        404: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -214,10 +215,10 @@ export async function opportunityRoutes(fastify: FastifyInstance): Promise<void>
     schema: {
       tags: ['Opportunities'],
       summary: 'Get deadline details for an opportunity',
-      params: z.object({ id: z.string().uuid() }),
+      params: zodToJson(z.object({ id: z.string().uuid() })),
       response: {
-        200: { type: 'object', properties: { data: z.object({}) } },
-        404: { type: 'object', properties: { error: z.object({}) } },
+        200: { type: 'object', properties: { data: zodToJson(z.object({})) } },
+        404: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {

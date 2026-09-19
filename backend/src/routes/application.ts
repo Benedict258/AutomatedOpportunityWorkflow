@@ -13,6 +13,7 @@ import { validateBody, validateParams, validateQuery } from '../middleware/valid
 import { authenticateRequest, requireCandidateAccess } from '../middleware/auth';
 import { createSingleResponse, createListResponse } from '../utils/api-envelope';
 import { AppError } from '../middleware/error';
+import { zodToJson } from '../utils/schema-converter';
 
 export async function applicationRoutes(fastify: FastifyInstance): Promise<void> {
   const applicationService = getApplicationService();
@@ -23,9 +24,9 @@ export async function applicationRoutes(fastify: FastifyInstance): Promise<void>
     schema: {
       tags: ['Applications'],
       summary: 'Create an application reference',
-      body: createApplicationSchema,
+      body: zodToJson(createApplicationSchema),
       response: {
-        201: { type: 'object', properties: { data: applicationSchema } },
+        201: { type: 'object', properties: { data: zodToJson(applicationSchema) } },
       },
     },
   }, async (request, reply) => {
@@ -40,9 +41,9 @@ export async function applicationRoutes(fastify: FastifyInstance): Promise<void>
     schema: {
       tags: ['Applications'],
       summary: 'List applications for authenticated candidate',
-      query: applicationFiltersSchema,
+      query: zodToJson(applicationFiltersSchema),
       response: {
-        200: { type: 'object', properties: { data: z.array(applicationSchema), meta: z.object({}), links: z.object({}).optional() } },
+        200: { type: 'object', properties: { data: zodToJson(z.array(applicationSchema)), meta: zodToJson(z.object({})), links: zodToJson(z.object({}).optional()) } },
       },
     },
   }, async (request, reply) => {
@@ -58,10 +59,10 @@ export async function applicationRoutes(fastify: FastifyInstance): Promise<void>
     schema: {
       tags: ['Applications'],
       summary: 'Get application by ID',
-      params: z.object({ id: z.string().uuid() }),
+      params: zodToJson(z.object({ id: z.string().uuid() })),
       response: {
-        200: { type: 'object', properties: { data: applicationSchema } },
-        404: { type: 'object', properties: { error: z.object({}) } },
+        200: { type: 'object', properties: { data: zodToJson(applicationSchema) } },
+        404: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -83,12 +84,12 @@ export async function applicationRoutes(fastify: FastifyInstance): Promise<void>
     schema: {
       tags: ['Applications'],
       summary: 'Update an application',
-      params: z.object({ id: z.string().uuid() }),
-      body: updateApplicationSchema,
+      params: zodToJson(z.object({ id: z.string().uuid() })),
+      body: zodToJson(updateApplicationSchema),
       response: {
-        200: { type: 'object', properties: { data: applicationSchema } },
-        404: { type: 'object', properties: { error: z.object({}) } },
-        403: { type: 'object', properties: { error: z.object({}) } },
+        200: { type: 'object', properties: { data: zodToJson(applicationSchema) } },
+        404: { type: 'object', properties: { error: zodToJson(z.object({})) } },
+        403: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -110,12 +111,12 @@ export async function applicationRoutes(fastify: FastifyInstance): Promise<void>
     schema: {
       tags: ['Applications'],
       summary: 'Send a reminder for an application',
-      params: z.object({ id: z.string().uuid() }),
-      body: sendReminderRequestSchema,
+      params: zodToJson(z.object({ id: z.string().uuid() })),
+      body: zodToJson(sendReminderRequestSchema),
       response: {
-        201: { type: 'object', properties: { data: reminderSchema } },
-        404: { type: 'object', properties: { error: z.object({}) } },
-        403: { type: 'object', properties: { error: z.object({}) } },
+        201: { type: 'object', properties: { data: zodToJson(reminderSchema) } },
+        404: { type: 'object', properties: { error: zodToJson(z.object({})) } },
+        403: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -137,11 +138,11 @@ export async function applicationRoutes(fastify: FastifyInstance): Promise<void>
     schema: {
       tags: ['Applications'],
       summary: 'Get reminder history for an application',
-      params: z.object({ id: z.string().uuid() }),
+      params: zodToJson(z.object({ id: z.string().uuid() })),
       response: {
-        200: { type: 'object', properties: { data: z.array(reminderSchema) } },
-        404: { type: 'object', properties: { error: z.object({}) } },
-        403: { type: 'object', properties: { error: z.object({}) } },
+        200: { type: 'object', properties: { data: zodToJson(z.array(reminderSchema)) } },
+        404: { type: 'object', properties: { error: zodToJson(z.object({})) } },
+        403: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -163,11 +164,11 @@ export async function applicationRoutes(fastify: FastifyInstance): Promise<void>
     schema: {
       tags: ['Applications'],
       summary: 'Get applications for a specific candidate',
-      params: z.object({ candidateId: z.string().uuid() }),
-      query: applicationFiltersSchema.omit({ userId: true }),
+      params: zodToJson(z.object({ candidateId: z.string().uuid() })),
+      query: zodToJson(applicationFiltersSchema.omit({ userId: true })),
       response: {
-        200: { type: 'object', properties: { data: z.array(applicationSchema), meta: z.object({}), links: z.object({}).optional() } },
-        403: { type: 'object', properties: { error: z.object({}) } },
+        200: { type: 'object', properties: { data: zodToJson(z.array(applicationSchema)), meta: zodToJson(z.object({})), links: zodToJson(z.object({}).optional()) } },
+        403: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {

@@ -10,6 +10,7 @@ import { validateBody, validateParams, validateQuery } from '../middleware/valid
 import { authenticateRequest } from '../middleware/auth';
 import { createSingleResponse, createListResponse } from '../utils/api-envelope';
 import { AppError } from '../middleware/error';
+import { zodToJson } from '../utils/schema-converter';
 
 export async function reprocessingRoutes(fastify: FastifyInstance): Promise<void> {
   const reprocessingService = getReprocessingService();
@@ -20,9 +21,9 @@ export async function reprocessingRoutes(fastify: FastifyInstance): Promise<void
     schema: {
       tags: ['Reprocessing'],
       summary: 'Create a reprocessing run',
-      body: createReprocessingRunSchema,
+      body: zodToJson(createReprocessingRunSchema),
       response: {
-        201: { type: 'object', properties: { data: reprocessingRunSchema } },
+        201: { type: 'object', properties: { data: zodToJson(reprocessingRunSchema) } },
       },
     },
   }, async (request, reply) => {
@@ -36,10 +37,10 @@ export async function reprocessingRoutes(fastify: FastifyInstance): Promise<void
     schema: {
       tags: ['Reprocessing'],
       summary: 'Get reprocessing run status',
-      params: z.object({ runId: z.string().uuid() }),
+      params: zodToJson(z.object({ runId: z.string().uuid() })),
       response: {
-        200: { type: 'object', properties: { data: reprocessingRunSchema } },
-        404: { type: 'object', properties: { error: z.object({}) } },
+        200: { type: 'object', properties: { data: zodToJson(reprocessingRunSchema) } },
+        404: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -57,9 +58,9 @@ export async function reprocessingRoutes(fastify: FastifyInstance): Promise<void
     schema: {
       tags: ['Reprocessing'],
       summary: 'List reprocessing runs',
-      query: reprocessingFiltersSchema,
+      query: zodToJson(reprocessingFiltersSchema),
       response: {
-        200: { type: 'object', properties: { data: z.array(reprocessingRunSchema), meta: z.object({}), links: z.object({}).optional() } },
+        200: { type: 'object', properties: { data: zodToJson(z.array(reprocessingRunSchema)), meta: zodToJson(z.object({})), links: zodToJson(z.object({}).optional()) } },
       },
     },
   }, async (request, reply) => {

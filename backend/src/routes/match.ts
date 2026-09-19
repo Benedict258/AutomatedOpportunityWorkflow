@@ -10,6 +10,7 @@ import { validateBody, validateParams, validateQuery } from '../middleware/valid
 import { authenticateRequest, requireCandidateAccess } from '../middleware/auth';
 import { createSingleResponse, createListResponse } from '../utils/api-envelope';
 import { AppError } from '../middleware/error';
+import { zodToJson } from '../utils/schema-converter';
 
 export async function matchRoutes(fastify: FastifyInstance): Promise<void> {
   const matchService = getMatchService();
@@ -21,9 +22,9 @@ export async function matchRoutes(fastify: FastifyInstance): Promise<void> {
       tags: ['Matches'],
       summary: 'Create matches for a candidate',
       description: 'Runs matching algorithm for candidate against specified opportunities',
-      body: createMatchRequestSchema,
+      body: zodToJson(createMatchRequestSchema),
       response: {
-        202: { type: 'object', properties: { data: z.array(matchSchema) } },
+        202: { type: 'object', properties: { data: zodToJson(z.array(matchSchema)) } },
       },
     },
   }, async (request, reply) => {
@@ -37,9 +38,9 @@ export async function matchRoutes(fastify: FastifyInstance): Promise<void> {
     schema: {
       tags: ['Matches'],
       summary: 'List matches',
-      query: matchFiltersSchema,
+      query: zodToJson(matchFiltersSchema),
       response: {
-        200: { type: 'object', properties: { data: z.array(matchSchema), meta: z.object({}), links: z.object({}).optional() } },
+        200: { type: 'object', properties: { data: zodToJson(z.array(matchSchema)), meta: zodToJson(z.object({})), links: zodToJson(z.object({}).optional()) } },
       },
     },
   }, async (request, reply) => {
@@ -54,10 +55,10 @@ export async function matchRoutes(fastify: FastifyInstance): Promise<void> {
     schema: {
       tags: ['Matches'],
       summary: 'Get match details',
-      params: z.object({ id: z.string().uuid() }),
+      params: zodToJson(z.object({ id: z.string().uuid() })),
       response: {
-        200: { type: 'object', properties: { data: matchSchema } },
-        404: { type: 'object', properties: { error: z.object({}) } },
+        200: { type: 'object', properties: { data: zodToJson(matchSchema) } },
+        404: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -75,11 +76,11 @@ export async function matchRoutes(fastify: FastifyInstance): Promise<void> {
     schema: {
       tags: ['Matches'],
       summary: 'Get matches for a candidate',
-      params: z.object({ candidateId: z.string().uuid() }),
-      query: matchFiltersSchema.omit({ candidateId: true }),
+      params: zodToJson(z.object({ candidateId: z.string().uuid() })),
+      query: zodToJson(matchFiltersSchema.omit({ candidateId: true })),
       response: {
-        200: { type: 'object', properties: { data: z.array(matchSchema), meta: z.object({}), links: z.object({}).optional() } },
-        403: { type: 'object', properties: { error: z.object({}) } },
+        200: { type: 'object', properties: { data: zodToJson(z.array(matchSchema)), meta: zodToJson(z.object({})), links: zodToJson(z.object({}).optional()) } },
+        403: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {

@@ -10,6 +10,7 @@ import { validateBody, validateParams, validateQuery } from '../middleware/valid
 import { authenticateRequest } from '../middleware/auth';
 import { createSingleResponse, createListResponse } from '../utils/api-envelope';
 import { AppError } from '../middleware/error';
+import { zodToJson } from '../utils/schema-converter';
 
 export async function verificationRoutes(fastify: FastifyInstance): Promise<void> {
   const verificationService = getVerificationService();
@@ -20,9 +21,9 @@ export async function verificationRoutes(fastify: FastifyInstance): Promise<void
     schema: {
       tags: ['Verification'],
       summary: 'Create a verification run',
-      body: createVerificationRunSchema,
+      body: zodToJson(createVerificationRunSchema),
       response: {
-        201: { type: 'object', properties: { data: verificationRunSchema } },
+        201: { type: 'object', properties: { data: zodToJson(verificationRunSchema) } },
       },
     },
   }, async (request, reply) => {
@@ -36,10 +37,10 @@ export async function verificationRoutes(fastify: FastifyInstance): Promise<void
     schema: {
       tags: ['Verification'],
       summary: 'Get verification run status',
-      params: z.object({ runId: z.string().uuid() }),
+      params: zodToJson(z.object({ runId: z.string().uuid() })),
       response: {
-        200: { type: 'object', properties: { data: verificationRunSchema } },
-        404: { type: 'object', properties: { error: z.object({}) } },
+        200: { type: 'object', properties: { data: zodToJson(verificationRunSchema) } },
+        404: { type: 'object', properties: { error: zodToJson(z.object({})) } },
       },
     },
   }, async (request, reply) => {
@@ -57,9 +58,9 @@ export async function verificationRoutes(fastify: FastifyInstance): Promise<void
     schema: {
       tags: ['Verification'],
       summary: 'List verification runs',
-      query: verificationFiltersSchema,
+      query: zodToJson(verificationFiltersSchema),
       response: {
-        200: { type: 'object', properties: { data: z.array(verificationRunSchema), meta: z.object({}), links: z.object({}).optional() } },
+        200: { type: 'object', properties: { data: zodToJson(z.array(verificationRunSchema)), meta: zodToJson(z.object({})), links: zodToJson(z.object({}).optional()) } },
       },
     },
   }, async (request, reply) => {
