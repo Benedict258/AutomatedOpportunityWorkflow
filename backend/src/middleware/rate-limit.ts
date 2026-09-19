@@ -1,4 +1,4 @@
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { config } from '../config/index';
 
 export async function rateLimitPlugin(fastify: FastifyInstance): Promise<void> {
@@ -8,7 +8,7 @@ export async function rateLimitPlugin(fastify: FastifyInstance): Promise<void> {
     max: rateLimitConfig.max,
     timeWindow: rateLimitConfig.windowMs,
     allowList: ['127.0.0.1', '::1'], // Allow localhost
-    keyGenerator: (request) => {
+    keyGenerator: (request: FastifyRequest) => {
       // Use API key or IP for rate limiting
       const apiKey = request.headers['x-api-key'];
       if (apiKey && typeof apiKey === 'string') {
@@ -16,7 +16,7 @@ export async function rateLimitPlugin(fastify: FastifyInstance): Promise<void> {
       }
       return request.ip;
     },
-    errorResponseBuilder: (opts) => ({
+    errorResponseBuilder: (opts: { max: number; timeWindow: number }, request: FastifyRequest) => ({
       error: {
         code: 'RATE_LIMITED',
         title: 'Rate Limited',
@@ -41,7 +41,7 @@ export async function authRateLimitPlugin(fastify: FastifyInstance): Promise<voi
   await fastify.register((await import('@fastify/rate-limit')).default, {
     max: 10,
     timeWindow: 60000, // 10 requests per minute
-    keyGenerator: (request) => request.ip,
+    keyGenerator: (request: FastifyRequest) => request.ip,
     errorResponseBuilder: () => ({
       error: {
         code: 'RATE_LIMITED',
@@ -59,7 +59,7 @@ export async function webhookRateLimitPlugin(fastify: FastifyInstance): Promise<
   await fastify.register((await import('@fastify/rate-limit')).default, {
     max: 1000,
     timeWindow: 60000, // 1000 requests per minute
-    keyGenerator: (request) => request.ip,
+    keyGenerator: (request: FastifyRequest) => request.ip,
     hook: 'onRequest',
   });
 }

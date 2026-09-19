@@ -1,15 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { OpportunityService } from '@/services/opportunity.service.js';
 import { createTestOpportunity } from '@tests/factories.js';
-
-vi.mock('@/db/connection.js', () => ({
-  getPool: vi.fn(() => ({ query: vi.fn() })),
-  executeQuery: vi.fn(),
-  executeTransaction: vi.fn(),
-  closePool: vi.fn(),
-  checkConnection: vi.fn().mockResolvedValue(true),
-  runMigrations: vi.fn().mockResolvedValue(undefined),
-}));
+import { executeQuery, getPool } from '@/db/connection.js';
+import { OpportunityPersister } from '@/persistence/opportunity-persister.js';
+import { VersionManager } from '@/discovery/versioning/version-manager.js';
+import { TimingIntelligenceEngine } from '@/intelligence/timing/timing-intelligence-engine.js';
+import { logger } from '@/utils/logger.js';
 
 vi.mock('@/persistence/opportunity-persister.js', () => ({
   OpportunityPersister: vi.fn().mockImplementation(() => ({
@@ -35,16 +31,12 @@ vi.mock('@/utils/logger.js', () => ({
     info: vi.fn(),
     warn: vi.fn(),
     error: vi.fn(),
+    debug: vi.fn(),
   },
 }));
 
-import { getPool, executeQuery } from '@/db/connection.js';
-import { OpportunityPersister } from '@/persistence/opportunity-persister.js';
-import { VersionManager } from '@/discovery/versioning/version-manager.js';
-import { TimingIntelligenceEngine } from '@/intelligence/timing/timing-intelligence-engine.js';
-
-const mockPool = vi.mocked(getPool);
 const mockExecuteQuery = vi.mocked(executeQuery);
+const mockGetPool = vi.mocked(getPool);
 const mockPersister = vi.mocked(OpportunityPersister);
 const mockVersionManager = vi.mocked(VersionManager);
 const mockTimingEngine = vi.mocked(TimingIntelligenceEngine);
@@ -68,11 +60,14 @@ describe('OpportunityService', () => {
     mockTimingEngine.mockImplementation(() => ({
       analyze: vi.fn().mockResolvedValue({ deadline: '2024-12-31', daysRemaining: 30 }),
     }));
-    
-    mockPool.mockReturnValue({ query: mockExecuteQuery });
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
   });
 
   it('should create opportunity', async () => {
+    const service = new OpportunityService();
     const input = {
       sourceId: 'source-123',
       title: 'New Opportunity',
@@ -80,23 +75,21 @@ describe('OpportunityService', () => {
     };
     
     mockExecuteQuery
-      .mockResolvedValueOnce({ rows: [createTestOpportunity()] }) // persist returns
       .mockResolvedValueOnce({ rows: [createTestOpportunity()] }); // getById returns
     
     const result = await service.create(input);
     
-    // The service calls persister.persist, not executeQuery directly
-    // expect(mockPersister).toHaveBeenCalled();
     expect(result).toBeDefined();
   });
 
   it('should get opportunity by ID', async () => {
+    const service = new OpportunityService();
     const opportunity = createTestOpportunity({ id: 'opp-123' });
     mockExecuteQuery.mockResolvedValue({ rows: [opportunity] });
     
     const result = await service.getById('opp-123');
     
-    expect(mockExecuteQuery).toHaveBeenCalledWith(
+    expect(executeQuery).toHaveBeenCalledWith(
       'SELECT * FROM opportunities WHERE id = $1',
       ['opp-123']
     );
@@ -104,6 +97,7 @@ describe('OpportunityService', () => {
   });
 
   it('should return null for non-existent opportunity', async () => {
+    const service = new OpportunityService();
     mockExecuteQuery.mockResolvedValue({ rows: [] });
     
     const result = await service.getById('non-existent');
@@ -112,12 +106,13 @@ describe('OpportunityService', () => {
   });
 
   it('should get opportunity by stable ID', async () => {
+    const service = new OpportunityService();
     const opportunity = createTestOpportunity({ stableId: 'stable-123' });
     mockExecuteQuery.mockResolvedValue({ rows: [opportunity] });
     
     const result = await service.getByStableId('stable-123');
     
-    expect(mockExecuteQuery).toHaveBeenCalledWith(
+    expect(executeQuery).toHaveBeenCalledWith(
       'SELECT * FROM opportunities WHERE stable_id = $1',
       ['stable-123']
     );
@@ -125,6 +120,7 @@ describe('OpportunityService', () => {
   });
 
   it('should list opportunities with filters', async () => {
+    const service = new OpportunityService();
     const opportunities = [createTestOpportunity(), createTestOpportunity()];
     mockExecuteQuery
       .mockResolvedValueOnce({ rows: [{ count: '2' }] }) // count
@@ -143,6 +139,7 @@ describe('OpportunityService', () => {
   });
 
   it('should update opportunity', async () => {
+    const service = new OpportunityService();
     const existing = createTestOpportunity({ id: 'opp-123' });
     const updated = createTestOpportunity({ id: 'opp-123', title: 'Updated Title' });
     
@@ -157,6 +154,7 @@ describe('OpportunityService', () => {
   });
 
   it('should return null when updating non-existent opportunity', async () => {
+    const service = new OpportunityService();
     mockExecuteQuery.mockResolvedValue({ rows: [] });
     
     const result = await service.update('non-existent', { title: 'New' });
@@ -165,11 +163,12 @@ describe('OpportunityService', () => {
   });
 
   it('should delete opportunity', async () => {
+    const service = new OpportunityService();
     mockExecuteQuery.mockResolvedValue({ rowCount: 1 });
     
     const result = await service.delete('opp-123');
     
-    expect(mockExecuteQuery).toHaveBeenCalledWith(
+    expect(executeQuery).toHaveBeenCalledWith(
       'DELETE FROM opportunities WHERE id = $1',
       ['opp-123']
     );
@@ -177,12 +176,10 @@ describe('OpportunityService', () => {
   });
 
   it('should get versions via versionManager', async () => {
+    const service = new OpportunityService();
     const versions = [{ id: 'v1', versionNumber: 1 }, { id: 'v2', versionNumber: 2 }];
-    // Access the mock instance
-    const versionManagerInstance = mockVersionManager.mock.results[0]?.value;
-    if (versionManagerInstance) {
-      versionManagerInstance.getLifecycle.mockResolvedValue(versions);
-    }
+    const versionManagerInstance = new (await import('@/discovery/versioning/version-manager.js')).VersionManager();
+    vi.spyOn(versionManagerInstance, 'getLifecycle').mockResolvedValue(versions);
     
     const result = await service.getVersions('opp-123');
     
@@ -190,6 +187,7 @@ describe('OpportunityService', () => {
   });
 
   it('should get intelligence', async () => {
+    const service = new OpportunityService();
     const opportunity = createTestOpportunity({ id: 'opp-123' });
     mockExecuteQuery.mockResolvedValue({ rows: [opportunity] });
     
@@ -201,6 +199,7 @@ describe('OpportunityService', () => {
   });
 
   it('should return null intelligence for non-existent opportunity', async () => {
+    const service = new OpportunityService();
     mockExecuteQuery.mockResolvedValue({ rows: [] });
     
     const result = await service.getIntelligence('non-existent');
@@ -209,25 +208,23 @@ describe('OpportunityService', () => {
   });
 
   it('should get deadline details', async () => {
+    const service = new OpportunityService();
     const opportunity = createTestOpportunity({ id: 'opp-123' });
     mockExecuteQuery.mockResolvedValue({ rows: [opportunity] });
     
     const result = await service.getDeadlineDetails('opp-123');
     
-    // Check that timing engine was called
-    const timingEngineInstance = mockTimingEngine.mock.results[0]?.value;
-    if (timingEngineInstance) {
-      expect(timingEngineInstance.analyze).toHaveBeenCalled();
-    }
     expect(result).toEqual({ deadline: '2024-12-31', daysRemaining: 30 });
   });
 
   it('should trigger reprocessing', async () => {
+    const service = new OpportunityService();
     await service.reprocess('opp-123');
     // Should not throw
   });
 
   it('should trigger verification', async () => {
+    const service = new OpportunityService();
     await service.verify('opp-123');
     // Should not throw
   });

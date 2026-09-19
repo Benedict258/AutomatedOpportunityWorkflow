@@ -94,14 +94,17 @@ export function createListResponse<T>(
 
   const buildUrl = (p: number) => {
     const url = new URL(baseUrl, `http://${request.headers.host}`);
-    url.searchParams.set('page', p.toString());
-    url.searchParams.set('limit', limit.toString());
-    // Preserve other query params
+    // Preserve original query parameter order by copying all params first
+    const params = new URLSearchParams();
     for (const [key, value] of Object.entries(request.query as Record<string, string>)) {
       if (key !== 'page' && key !== 'limit' && value) {
-        url.searchParams.set(key, value);
+        params.append(key, value);
       }
     }
+    // Add pagination params at the end
+    params.set('page', p.toString());
+    params.set('limit', limit.toString());
+    url.search = params.toString();
     return url.toString();
   };
 

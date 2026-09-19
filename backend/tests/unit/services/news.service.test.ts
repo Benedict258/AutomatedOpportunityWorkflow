@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NewsService } from '@/services/news.service.js';
-import { createMockNewsService, createTestNewsItem } from '@tests/factories.js';
+import { createTestNewsItem } from '@tests/factories.js';
+import { executeQuery } from '@/db/connection.js';
 
-vi.mock('@/db/connection.js');
 vi.mock('@/utils/logger.js', () => ({
   logger: {
     info: vi.fn(),
@@ -11,14 +11,15 @@ vi.mock('@/utils/logger.js', () => ({
   },
 }));
 
+const mockExecuteQuery = vi.mocked(executeQuery);
+
 describe('NewsService', () => {
   let service: NewsService;
-  let mockExecuteQuery: any;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockExecuteQuery = vi.fn();
-    vi.mocked(require('@/db/connection.js').executeQuery).mockImplementation(mockExecuteQuery);
+    mockExecuteQuery.mockReset();
+    service = new NewsService();
   });
 
   it('should create news item', async () => {
@@ -28,7 +29,7 @@ describe('NewsService', () => {
     
     const result = await service.create(input);
     
-    expect(mockExecuteQuery).toHaveBeenCalledWith(
+    expect(executeQuery).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO news_items'),
       expect.arrayContaining([input.title, input.sourceId, input.url])
     );

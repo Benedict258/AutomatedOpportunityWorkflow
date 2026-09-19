@@ -37,6 +37,13 @@ export default defineConfig({
     deps: {
       inline: ['@fastify/rate-limit', '@fastify/helmet', '@fastify/cors', '@fastify/swagger'],
     },
+    // Fix ES module mocking
+    pool: 'forks',
+    poolOptions: {
+      forks: {
+        singleFork: true,
+      },
+    },
   },
   resolve: {
     alias: {

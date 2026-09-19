@@ -84,12 +84,12 @@ describe('Webhook Schemas', () => {
             confidence: 0.95,
           },
           requirements: [
-            { id: '123', name: 'PhD', requirementType: 'EDUCATION', isRequired: true },
+            { id: '123e4567-e89b-12d3-a456-426614174002', name: 'PhD', requirementType: 'EDUCATION', isRequired: true },
           ],
           eligibility: {
             overallEligible: true,
             requirements: [
-              { requirementId: '123', state: 'MET' },
+              { requirementId: '123e4567-e89b-12d3-a456-426614174003', state: 'MET' },
             ],
           },
           explanation: {
@@ -261,7 +261,7 @@ describe('Webhook Schemas', () => {
       const result = webhookRegistrationSchema.parse({
         url: 'https://example.com/webhook',
         events: ['discovery.complete', 'intelligence.complete'],
-        secret: 'secret-key-min-32-chars-long',
+        secret: 'secret-key-min-32-chars-long-enough',
         active: true,
       });
       expect(result.url).toBe('https://example.com/webhook');

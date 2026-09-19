@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ApplicationService } from '@/services/application.service.js';
-import { createMockApplicationService, createTestApplication } from '@tests/factories.js';
+import { createTestApplication } from '@tests/factories.js';
+import { executeQuery } from '@/db/connection.js';
 
-vi.mock('@/db/connection.js');
 vi.mock('@/utils/logger.js', () => ({
   logger: {
     info: vi.fn(),
@@ -11,14 +11,15 @@ vi.mock('@/utils/logger.js', () => ({
   },
 }));
 
+const mockExecuteQuery = vi.mocked(executeQuery);
+
 describe('ApplicationService', () => {
   let service: ApplicationService;
-  let mockExecuteQuery: any;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockExecuteQuery = vi.fn();
-    vi.mocked(require('@/db/connection.js').executeQuery).mockImplementation(mockExecuteQuery);
+    mockExecuteQuery.mockReset();
+    service = new ApplicationService();
   });
 
   it('should create application', async () => {
@@ -29,7 +30,7 @@ describe('ApplicationService', () => {
     
     const result = await service.create(input, userId);
     
-    expect(mockExecuteQuery).toHaveBeenCalledWith(
+    expect(executeQuery).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO application_references'),
       expect.arrayContaining([input.opportunityId, userId])
     );

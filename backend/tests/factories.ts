@@ -52,7 +52,7 @@ export function createMockReply(overrides: Partial<{
   let statusCode = overrides.statusCode || 200;
   let sentPayload: unknown = null;
   
-  return {
+  const reply = {
     code: vi.fn((code: number) => {
       statusCode = code;
       return {
@@ -87,11 +87,24 @@ export function createMockReply(overrides: Partial<{
     getHeaders: vi.fn(() => headers),
     getStatusCode: vi.fn(() => statusCode),
     sentPayload: vi.fn(() => sentPayload),
+    // Expose statusCode as property for middleware access
+    get statusCode() { return statusCode; },
+    set statusCode(code: number) { statusCode = code; },
     // Test helpers
     _getStatusCode: () => statusCode,
     _getHeaders: () => headers,
     _getPayload: () => sentPayload,
   };
+  
+  // Apply overrides
+  if (overrides.statusCode !== undefined) {
+    statusCode = overrides.statusCode;
+  }
+  if (overrides.headers) {
+    Object.assign(headers, overrides.headers);
+  }
+  
+  return reply;
 }
 
 export function createMockFastifyInstance() {

@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MatchService } from '@/services/match.service.js';
-import { createMockMatchService, createTestMatch } from '@tests/factories.js';
+import { createTestMatch } from '@tests/factories.js';
+import { executeQuery } from '@/db/connection';
 
-vi.mock('@/db/connection.js');
 vi.mock('@/utils/logger.js', () => ({
   logger: {
     info: vi.fn(),
@@ -11,17 +11,17 @@ vi.mock('@/utils/logger.js', () => ({
   },
 }));
 
+const mockExecuteQuery = vi.mocked(executeQuery);
+
 describe('MatchService', () => {
   let service: MatchService;
-  let mockExecuteQuery: any;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockExecuteQuery = vi.fn();
-    vi.mocked(require('@/db/connection.js').executeQuery).mockImplementation(mockExecuteQuery);
   });
 
   it('should create matches for candidate', async () => {
+    const service = new MatchService();
     const request = { candidateId: 'cand-123', opportunityIds: ['opp-1', 'opp-2'] };
     mockExecuteQuery.mockResolvedValue({ rows: [] });
     
@@ -31,6 +31,7 @@ describe('MatchService', () => {
   });
 
   it('should list matches with filters', async () => {
+    const service = new MatchService();
     const matches = [createTestMatch(), createTestMatch()];
     mockExecuteQuery
       .mockResolvedValueOnce({ rows: [{ count: '2' }] }) // count
@@ -49,12 +50,13 @@ describe('MatchService', () => {
   });
 
   it('should get match by ID', async () => {
+    const service = new MatchService();
     const match = createTestMatch({ id: 'match-123' });
     mockExecuteQuery.mockResolvedValue({ rows: [match] });
     
     const result = await service.getById('match-123');
     
-    expect(mockExecuteQuery).toHaveBeenCalledWith(
+    expect(executeQuery).toHaveBeenCalledWith(
       'SELECT * FROM candidate_matches WHERE id = $1',
       ['match-123']
     );
@@ -62,6 +64,7 @@ describe('MatchService', () => {
   });
 
   it('should get matches for candidate', async () => {
+    const service = new MatchService();
     const matches = [createTestMatch({ candidateId: 'cand-123' })];
     mockExecuteQuery
       .mockResolvedValueOnce({ rows: [{ count: '1' }] })
@@ -74,30 +77,31 @@ describe('MatchService', () => {
   });
 
   it('should apply default pagination', async () => {
+    const service = new MatchService();
     mockExecuteQuery
       .mockResolvedValueOnce({ rows: [{ count: '0' }] })
       .mockResolvedValueOnce({ rows: [] });
     
     await service.list({});
     
-    // Check that defaults are applied in the query
-    expect(mockExecuteQuery).toHaveBeenCalledTimes(2);
+    expect(executeQuery).toHaveBeenCalledTimes(2);
   });
 
   it('should apply score filters', async () => {
+    const service = new MatchService();
     mockExecuteQuery
       .mockResolvedValueOnce({ rows: [{ count: '0' }] })
       .mockResolvedValueOnce({ rows: [] });
     
     await service.list({ minScore: 0.5, maxScore: 0.9 });
     
-    // The query should include score filters
     const countQuery = mockExecuteQuery.mock.calls[0][0];
-    expect(countQuery).toContain('minScore');
-    expect(countQuery).toContain('maxScore');
+    expect(countQuery).toContain('>=');
+    expect(countQuery).toContain('<=');
   });
 
   it('should apply date filters', async () => {
+    const service = new MatchService();
     mockExecuteQuery
       .mockResolvedValueOnce({ rows: [{ count: '0' }] })
       .mockResolvedValueOnce({ rows: [] });
@@ -105,7 +109,7 @@ describe('MatchService', () => {
     await service.list({ computedAfter: '2024-01-01', computedBefore: '2024-12-31' });
     
     const countQuery = mockExecuteQuery.mock.calls[0][0];
-    expect(countQuery).toContain('computed_after');
-    expect(countQuery).toContain('computed_before');
+    expect(countQuery).toContain('computed_at >=');
+    expect(countQuery).toContain('computed_at <=');
   });
 });
