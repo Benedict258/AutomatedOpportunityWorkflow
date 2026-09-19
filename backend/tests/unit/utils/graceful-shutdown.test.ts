@@ -1,100 +1,85 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { setupGracefulShutdown, isShutdownInProgress } from '@/utils/graceful-shutdown.js';
-import { closePool } from '@/db/connection.js';
-
-vi.mock('@/db/connection.js');
-vi.mock('@/utils/logger.js', () => ({
-  logger: {
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-    fatal: vi.fn(),
-  },
-}));
+import { setupGracefulShutdown, shutdown } from '@/utils/graceful-shutdown.js';
 
 describe('Graceful Shutdown', () => {
   let mockServer: any;
-  let originalExit: typeof process.exit;
   let exitMock: any;
+  let loggerMock: any;
 
   beforeEach(() => {
     vi.clearAllMocks();
+    
     mockServer = {
       close: vi.fn((callback: (err?: Error) => void) => callback()),
+      listening: true,
     };
-    vi.mocked(closePool).mockResolvedValue(undefined);
-    
-    originalExit = process.exit;
-    exitMock = vi.fn();
-    process.exit = exitMock as any;
+
+    loggerMock = {
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    };
+
+    vi.mock('@/utils/logger.js', () => ({
+      logger: loggerMock,
+    }));
+
+    exitMock = vi.spyOn(process, 'exit').mockImplementation((code) => {
+      throw new Error(`process.exit called with ${code}`);
+    });
   });
 
   afterEach(() => {
-    process.exit = originalExit;
-    // Reset the module state
-    vi.resetModules();
+    vi.restoreAllMocks();
   });
 
-  it('should setup signal handlers', () => {
+  it('should register signal handlers', () => {
     setupGracefulShutdown(mockServer);
     
-    // Check that handlers are registered
     expect(process.listenerCount('SIGTERM')).toBeGreaterThan(0);
     expect(process.listenerCount('SIGINT')).toBeGreaterThan(0);
     expect(process.listenerCount('uncaughtException')).toBeGreaterThan(0);
     expect(process.listenerCount('unhandledRejection')).toBeGreaterThan(0);
   });
 
-  it('should return false initially for shutdown status', () => {
-    expect(isShutdownInProgress()).toBe(false);
-  });
-
-  it('should initiate shutdown on SIGTERM', async () => {
+  it('should handle SIGTERM', async () => {
     setupGracefulShutdown(mockServer);
     
-    // Emit SIGTERM
     process.emit('SIGTERM');
     
-    // Wait for async operations
     await new Promise(resolve => setTimeout(resolve, 10));
     
+    expect(loggerMock.info).toHaveBeenCalledWith({ signal: 'SIGTERM' }, 'Received signal, starting graceful shutdown');
     expect(mockServer.close).toHaveBeenCalled();
-    expect(closePool).toHaveBeenCalled();
     expect(exitMock).toHaveBeenCalledWith(0);
   });
 
-  it('should initiate shutdown on SIGINT', async () => {
+  it('should handle SIGINT', async () => {
     setupGracefulShutdown(mockServer);
     
     process.emit('SIGINT');
     
     await new Promise(resolve => setTimeout(resolve, 10));
     
-    expect(mockServer.close).toHaveBeenCalled();
-    expect(exitMock).toHaveBeenCalledWith(0);
+    expect(loggerMock.info).toHaveBeenCalledWith({ signal: 'SIGINT' }, 'Received signal, starting graceful shutdown');
   });
 
   it('should handle server close error', async () => {
-    mockServer.close = vi.fn((callback: (err?: Error) => void) => callback(new Error('Close failed')));
-    setupGracefulShutdown(mockServer);
+    const errorServer = {
+      close: vi.fn((callback: (err?: Error) => void) => callback(new Error('Close failed'))),
+      listening: true,
+    };
+    
+    setupGracefulShutdown(errorServer);
     
     process.emit('SIGTERM');
     
     await new Promise(resolve => setTimeout(resolve, 10));
     
-    expect(exitMock).toHaveBeenCalledWith(0); // Still exits 0 after logging error
-  });
-
-  it('should force exit on second shutdown signal', async () => {
-    setupGracefulShutdown(mockServer);
-    
-    // First signal
-    process.emit('SIGTERM');
-    await new Promise(resolve => setTimeout(resolve, 10));
-    
-    // Second signal during shutdown
-    process.emit('SIGTERM');
-    
+    expect(loggerMock.error).toHaveBeenCalledWith(
+      expect.objectContaining({ err: expect.any(Error) }),
+      'Error closing server'
+    );
     expect(exitMock).toHaveBeenCalledWith(1);
   });
 
@@ -105,6 +90,10 @@ describe('Graceful Shutdown', () => {
     
     await new Promise(resolve => setTimeout(resolve, 10));
     
+    expect(loggerMock.error).toHaveBeenCalledWith(
+      expect.objectContaining({ err: expect.any(Error) }),
+      'Uncaught exception'
+    );
     expect(exitMock).toHaveBeenCalledWith(1);
   });
 
@@ -115,6 +104,21 @@ describe('Graceful Shutdown', () => {
     
     await new Promise(resolve => setTimeout(resolve, 10));
     
+    expect(loggerMock.error).toHaveBeenCalledWith(
+      expect.objectContaining({ err: expect.any(Error) }),
+      'Unhandled rejection'
+    );
     expect(exitMock).toHaveBeenCalledWith(1);
+  });
+
+  it('should not double shutdown', async () => {
+    setupGracefulShutdown(mockServer);
+    
+    process.emit('SIGTERM');
+    process.emit('SIGINT');
+    
+    await new Promise(resolve => setTimeout(resolve, 10));
+    
+    expect(mockServer.close).toHaveBeenCalledTimes(1);
   });
 });

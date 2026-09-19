@@ -33,7 +33,7 @@ describe('Idempotency Utilities', () => {
       const hash1 = hashRequest('POST', '/api/test', { name: 'test' });
       const hash2 = hashRequest('POST', '/api/test', { name: 'test' });
       expect(hash1).toBe(hash2);
-      expect(hash1).toHaveLength(64); // SHA256 hex
+      expect(hash1).toHaveLength(64);
     });
 
     it('should generate different hash for different method', () => {
@@ -101,10 +101,10 @@ describe('Idempotency Utilities', () => {
         expect.stringContaining('INSERT INTO idempotency_keys'),
         [
           'key-123',
-          expect.any(String), // request hash
+          expect.any(String),
           201,
           JSON.stringify({ id: 'created' }),
-          expect.any(Date), // expires_at
+          expect.any(Date),
         ]
       );
     });
@@ -112,12 +112,19 @@ describe('Idempotency Utilities', () => {
     it('should handle database error gracefully', async () => {
       mockPool.query.mockRejectedValue(new Error('DB error'));
 
-      // Should not throw
       await expect(storeIdempotency('key-123', 'POST', '/api/test', {}, 201, {})).resolves.not.toThrow();
     });
   });
 
   describe('idempotencyMiddleware', () => {
+    let mockPool: any;
+
+    beforeEach(() => {
+      vi.clearAllMocks();
+      mockPool = { query: vi.fn() };
+      vi.mocked(getPool).mockReturnValue(mockPool);
+    });
+
     it('should skip non-mutating methods', async () => {
       const request = createMockRequest({ method: 'GET' });
       const reply = createMockReply();
@@ -125,7 +132,6 @@ describe('Idempotency Utilities', () => {
       const middleware = idempotencyMiddleware();
       await middleware(request, reply);
       
-      // Should not check or store idempotency
       expect(mockPool.query).not.toHaveBeenCalled();
     });
 
@@ -153,7 +159,7 @@ describe('Idempotency Utilities', () => {
             response_status: 201,
             response_body: JSON.stringify({ id: 'created' }),
           }],
-        }); // checkIdempotency
+        });
       
       const middleware = idempotencyMiddleware();
       await middleware(request, reply);
@@ -171,17 +177,14 @@ describe('Idempotency Utilities', () => {
       const reply = createMockReply();
       
       mockPool.query
-        .mockResolvedValueOnce({ rows: [] }) // checkIdempotency - no cache
-        .mockResolvedValueOnce({}); // storeIdempotency
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({});
       
       const middleware = idempotencyMiddleware();
       await middleware(request, reply);
       
-      // Simulate response
-      reply._getPayload(); // Get the send function
       reply.send({ id: 'created' });
       
-      // Give time for the async store to complete
       await new Promise(resolve => setTimeout(resolve, 10));
       
       expect(mockPool.query).toHaveBeenCalledTimes(2);
@@ -195,17 +198,15 @@ describe('Idempotency Utilities', () => {
       });
       const reply = createMockReply();
       
-      mockPool.query.mockResolvedValue({ rows: [] }); // checkIdempotency
+      mockPool.query.mockResolvedValue({ rows: [] });
       
       const middleware = idempotencyMiddleware();
       await middleware(request, reply);
       
-      // Simulate 500 response
       reply.code(500).send({ error: 'Internal error' });
       
       await new Promise(resolve => setTimeout(resolve, 10));
       
-      // Should only have called check, not store
       expect(mockPool.query).toHaveBeenCalledTimes(1);
     });
   });

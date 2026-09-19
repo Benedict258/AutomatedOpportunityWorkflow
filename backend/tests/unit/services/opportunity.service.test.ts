@@ -1,69 +1,43 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { OpportunityService } from '@/services/opportunity.service.js';
 import { createTestOpportunity } from '@tests/factories.js';
-import { executeQuery, getPool } from '@/db/connection.js';
-import { OpportunityPersister } from '@/persistence/opportunity-persister.js';
-import { VersionManager } from '@/discovery/versioning/version-manager.js';
-import { TimingIntelligenceEngine } from '@/intelligence/timing/timing-intelligence-engine.js';
-import { logger } from '@/utils/logger.js';
+import { executeQuery } from '@/db/connection';
 
-vi.mock('@/persistence/opportunity-persister.js', () => ({
+vi.mock('../../../src/persistence/opportunity-persister.js', () => ({
   OpportunityPersister: vi.fn().mockImplementation(() => ({
     persist: vi.fn().mockResolvedValue({ inserted: 1, updated: 0, opportunities: [createTestOpportunity()] }),
   })),
 }));
 
-vi.mock('@/discovery/versioning/version-manager.js', () => ({
+vi.mock('../../../src/discovery/versioning/version-manager.js', () => ({
   VersionManager: vi.fn().mockImplementation(() => ({
     createVersion: vi.fn().mockResolvedValue(undefined),
     getLifecycle: vi.fn().mockResolvedValue([]),
   })),
 }));
 
-vi.mock('@/intelligence/timing/timing-intelligence-engine.js', () => ({
+vi.mock('../../../src/intelligence/timing/timing-intelligence-engine.js', () => ({
   TimingIntelligenceEngine: vi.fn().mockImplementation(() => ({
     analyze: vi.fn().mockResolvedValue({ deadline: '2024-12-31', daysRemaining: 30 }),
   })),
 }));
 
-vi.mock('@/utils/logger.js', () => ({
+vi.mock('../../../src/utils/logger.js', () => ({
   logger: {
     info: vi.fn(),
     warn: vi.fn(),
     error: vi.fn(),
-    debug: vi.fn(),
   },
 }));
 
 const mockExecuteQuery = vi.mocked(executeQuery);
-const mockGetPool = vi.mocked(getPool);
-const mockPersister = vi.mocked(OpportunityPersister);
-const mockVersionManager = vi.mocked(VersionManager);
-const mockTimingEngine = vi.mocked(TimingIntelligenceEngine);
 
 describe('OpportunityService', () => {
   let service: OpportunityService;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
-    // Reset mock implementations
-    mockPersister.mockImplementation(() => ({
-      persist: vi.fn().mockResolvedValue({ inserted: 1, updated: 0, opportunities: [createTestOpportunity()] }),
-    }));
-    
-    mockVersionManager.mockImplementation(() => ({
-      createVersion: vi.fn().mockResolvedValue(undefined),
-      getLifecycle: vi.fn().mockResolvedValue([]),
-    }));
-    
-    mockTimingEngine.mockImplementation(() => ({
-      analyze: vi.fn().mockResolvedValue({ deadline: '2024-12-31', daysRemaining: 30 }),
-    }));
-  });
-
-  afterEach(() => {
-    vi.resetAllMocks();
+    mockExecuteQuery.mockReset();
   });
 
   it('should create opportunity', async () => {
@@ -74,8 +48,7 @@ describe('OpportunityService', () => {
       organization: 'Org',
     };
     
-    mockExecuteQuery
-      .mockResolvedValueOnce({ rows: [createTestOpportunity()] }); // getById returns
+    mockExecuteQuery.mockResolvedValue({ rows: [createTestOpportunity()] });
     
     const result = await service.create(input);
     
@@ -123,8 +96,8 @@ describe('OpportunityService', () => {
     const service = new OpportunityService();
     const opportunities = [createTestOpportunity(), createTestOpportunity()];
     mockExecuteQuery
-      .mockResolvedValueOnce({ rows: [{ count: '2' }] }) // count
-      .mockResolvedValueOnce({ rows: opportunities }); // data
+      .mockResolvedValueOnce({ rows: [{ count: '2' }] })
+      .mockResolvedValueOnce({ rows: opportunities });
     
     const result = await service.list({
       page: 1,
@@ -144,9 +117,9 @@ describe('OpportunityService', () => {
     const updated = createTestOpportunity({ id: 'opp-123', title: 'Updated Title' });
     
     mockExecuteQuery
-      .mockResolvedValueOnce({ rows: [existing] }) // getById
-      .mockResolvedValueOnce({}) // UPDATE
-      .mockResolvedValueOnce({ rows: [updated] }); // getById
+      .mockResolvedValueOnce({ rows: [existing] })
+      .mockResolvedValueOnce({})
+      .mockResolvedValueOnce({ rows: [updated] });
     
     const result = await service.update('opp-123', { title: 'Updated Title' });
     
@@ -178,8 +151,13 @@ describe('OpportunityService', () => {
   it('should get versions via versionManager', async () => {
     const service = new OpportunityService();
     const versions = [{ id: 'v1', versionNumber: 1 }, { id: 'v2', versionNumber: 2 }];
-    const versionManagerInstance = new (await import('@/discovery/versioning/version-manager.js')).VersionManager();
-    vi.spyOn(versionManagerInstance, 'getLifecycle').mockResolvedValue(versions);
+    
+    // Mock the version manager instance
+    const { VersionManager } = await import('../../../src/discovery/versioning/version-manager.js');
+    const versionManagerInstance = vi.mocked(VersionManager).mock.results[0]?.value;
+    if (versionManagerInstance) {
+      vi.spyOn(versionManagerInstance, 'getLifecycle').mockResolvedValue(versions);
+    }
     
     const result = await service.getVersions('opp-123');
     
@@ -220,12 +198,10 @@ describe('OpportunityService', () => {
   it('should trigger reprocessing', async () => {
     const service = new OpportunityService();
     await service.reprocess('opp-123');
-    // Should not throw
   });
 
   it('should trigger verification', async () => {
     const service = new OpportunityService();
     await service.verify('opp-123');
-    // Should not throw
   });
 });

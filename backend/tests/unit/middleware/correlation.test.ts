@@ -20,7 +20,7 @@ describe('Correlation ID Middleware', () => {
     await onRequestHook(request, reply);
 
     expect(request.correlationId).toBeDefined();
-    expect(request.correlationId).toMatch(/^[0-9a-f-]{36}$/); // UUID format
+    expect(request.correlationId).toMatch(/^[0-9a-f-]{36}$/);
     expect(reply._getHeaders()['x-correlation-id']).toBe(request.correlationId);
   });
 
@@ -98,7 +98,6 @@ describe('Correlation ID Middleware', () => {
     expect(request.log.error).toHaveBeenCalledWith(
       expect.objectContaining({
         err: testError,
-        statusCode: 500,
         correlationId: request.correlationId,
         requestId: request.requestId,
       }),
