@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^20.0.0",
+    "@types/node": "^24.0.0",
     "@types/axios": "^0.14.0",
     "undici-types": "^6.19.0",
     "typescript": "^5.3.3"
