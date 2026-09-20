@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { fileURLToPath } from 'url';
 import path from 'path';
 import yaml from 'js-yaml';
 import { AppConfigSchema, type AppConfig } from './schema';
@@ -37,6 +38,8 @@ function loadYamlFile(filePath: string): any {
 }
 
 export function loadConfig(): AppConfig {
+  const __filename=fileURLToPath(import.meta.url);
+  const __dirname=path.dirname(__filename);
   const configDir = path.resolve(__dirname, '../../config');
   const env = process.env.NODE_ENV ?? 'development';
 
