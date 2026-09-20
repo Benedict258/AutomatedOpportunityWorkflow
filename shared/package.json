@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "automated-opportunity-workflow": "file:..",
+    "axios": "^1.7.0",
     "js-yaml": "^4.1.0",
     "zod": "^3.23.8"
   },

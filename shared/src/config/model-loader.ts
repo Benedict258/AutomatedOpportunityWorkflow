@@ -19,7 +19,7 @@ function getEnvPrefix(prefix: string): Record<string, string> {
   const result: Record<string, string> = {};
   for (const [key, value] of Object.entries(process.env)) {
     if (key.startsWith(prefix) && value !== undefined) {
-      result[key] = value;
+      result[key] = value as string;
     }
   }
   return result;
