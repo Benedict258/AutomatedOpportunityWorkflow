@@ -12,7 +12,7 @@ export function citizenshipRule(candidate: EligibilityContext['candidate'], requ
     return makeDecision(reqId, reqDesc, candidateField, 'UNCERTAIN', 'Citizenship missing', undefined, 0);
   }
   
-  const eligible = required.some(r => actual.map(a => a.toLowerCase()).includes(String(r).toLowerCase()));
+  const eligible = required.some((r: any) => actual.map(a => a.toLowerCase()).includes(String(r).toLowerCase()));
   return makeDecision(
     reqId,
     reqDesc,

@@ -1,0 +1,78 @@
+services:
+  - type: web
+    name: ois-api
+    runtime: node
+    plan: starter
+    buildCommand: cd backend && npm ci && npm run build
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "10000"
+      # The following must be set in Render dashboard (secrets), not committed here.
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: WEBHOOK_HMAC_SECRET
+        sync: false
+      - key: USAJOBS_API_KEY
+        sync: false
+      - key: USAJOBS_USER_AGENT
+        sync: false
+      - key: MODEL_PROVIDER_NVIDIA_API_KEY
+        sync: false
+      - key: MODEL_PROVIDER_NVIDIA_BASE_URL
+        value: https://integrate.api.nvidia.com/v1
+      - key: MODEL_PROVIDER_NVIDIA_ENABLED
+        value: "true"
+      - key: MODEL_PROVIDER_NVIDIA_PRIORITY
+        value: "1"
+      - key: MODEL_PROVIDER_NVIDIA_RATE_LIMIT_RPM
+        value: "60"
+      - key: MODEL_PROVIDER_NVIDIA_RATE_LIMIT_TPM
+        value: "150000"
+      - key: MODEL_NEMOTRON_3_ULTRA_PROVIDER
+        value: nvidia
+      - key: MODEL_NEMOTRON_3_ULTRA_NAME
+        value: nvidia/nemotron-3-ultra-550b-a55b
+      - key: MODEL_NEMOTRON_3_ULTRA_CAPABILITIES
+        value: text-generation,structured-generation
+      - key: MODEL_NEMOTRON_3_ULTRA_ENABLED
+        value: "true"
+      - key: MODEL_NVIDIA_EMBED_1B_PROVIDER
+        value: nvidia
+      - key: MODEL_NVIDIA_EMBED_1B_NAME
+        value: nvidia/nemotron-3-embed-1b
+      - key: MODEL_NVIDIA_EMBED_1B_CAPABILITIES
+        value: embeddings
+      - key: MODEL_NVIDIA_EMBED_1B_DIMENSIONS
+        value: "2048"
+      - key: MODEL_NVIDIA_EMBED_1B_ENABLED
+        value: "true"
+      - key: MODEL_DEFAULT_EXTRACTION
+        value: nemotron-3-ultra
+      - key: MODEL_DEFAULT_CLASSIFICATION
+        value: nemotron-3-ultra
+      - key: MODEL_DEFAULT_EMBEDDING
+        value: nemotron-3-embed-1b
+      - key: MODEL_DEFAULT_REASONING
+        value: nemotron-3-ultra
+      - key: MODEL_DEFAULT_MATCHING
+        value: nemotron-3-embed-1b
+      - key: MODEL_DEFAULT_RERANKING
+        value: ""
+      # Optional CORS
+      - key: CORS_ORIGIN
+        value: "*"
+      - key: LOG_LEVEL
+        value: info
+      - key: LOG_PRETTY
+        value: "false"
+      - key: SWAGGER_ENABLED
+        value: "false"
+      - key: IDEMPOTENCY_TTL_MS
+        value: "86400000"
+      - key: HEALTH_CHECK_TIMEOUT_MS
+        value: "5000"

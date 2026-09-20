@@ -83,7 +83,7 @@ export function validateQuery<T>(schema: ZodSchema<T>) {
 export function validateHeaders<T>(schema: ZodSchema<T>) {
   return async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     try {
-      request.headers = schema.parse(request.headers);
+      request.headers = schema.parse(request.headers) as any;
     } catch (error) {
       if (error instanceof ZodError) {
         request.log.warn({ errors: error.errors }, 'Headers validation failed');

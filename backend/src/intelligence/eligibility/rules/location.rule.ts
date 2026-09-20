@@ -12,7 +12,7 @@ export function locationRule(candidate: EligibilityContext['candidate'], require
     return makeDecision(reqId, reqDesc, candidateField, 'UNCERTAIN', 'Candidate location missing', undefined, 0);
   }
   
-  const eligible = !requiredCountry || actualCountry.toLowerCase() === String(requiredCountry).toLowerCase();
+  const eligible = !requiredCountry || actualCountry!.toLowerCase() === String(requiredCountry).toLowerCase();
   return makeDecision(
     reqId,
     reqDesc,

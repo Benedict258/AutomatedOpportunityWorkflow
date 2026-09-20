@@ -1,0 +1,55 @@
+nodes:
+  - id: international_affairs
+    name: INTERNATIONAL AFFAIRS
+    parent: null
+    active: true
+
+  - id: international_affairs.diplomacy
+    name: Diplomacy
+    parent: international_affairs
+    active: true
+
+  - id: international_affairs.foreign_policy
+    name: Foreign Policy
+    parent: international_affairs
+    active: true
+
+  - id: international_affairs.international_security
+    name: International Security
+    parent: international_affairs
+    active: true
+
+  - id: international_affairs.international_development
+    name: International Development
+    parent: international_affairs
+    active: true
+
+  - id: international_affairs.global_governance
+    name: Global Governance
+    parent: international_affairs
+    active: true
+
+  - id: international_affairs.geopolitics
+    name: Geopolitics
+    parent: international_affairs
+    active: true
+
+  - id: international_affairs.international_organizations
+    name: International Organizations
+    parent: international_affairs
+    active: true
+
+  - id: international_affairs.technology_diplomacy
+    name: Technology Diplomacy
+    parent: international_affairs
+    active: true
+
+  - id: international_affairs.cyber_diplomacy
+    name: Cyber Diplomacy
+    parent: international_affairs
+    active: true
+
+  - id: international_affairs.global_technology_policy
+    name: Global Technology Policy
+    parent: international_affairs
+    active: true

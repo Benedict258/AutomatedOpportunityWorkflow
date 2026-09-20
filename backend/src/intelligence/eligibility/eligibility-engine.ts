@@ -106,7 +106,6 @@ export class EligibilityEngine implements IEligibilityEngine {
         id: candidate?.id || 'unknown',
         education: candidate?.education || [],
         experience: candidate?.experience || [],
-        skills: candidate?.skills || [],
         certifications: candidate?.certifications || [],
         location: candidate?.location || '',
         citizenship: candidate?.citizenship || '',
@@ -118,7 +117,7 @@ export class EligibilityEngine implements IEligibilityEngine {
         requirements: opportunity?.requirements || [],
         deadline: opportunity?.deadline,
         location: opportunity?.location || '',
-        remoteStatus: opportunity?.remoteStatus || 'unknown',
+        remoteAllowed: opportunity?.remoteAllowed || false,
       },
     };
     return this.evaluate(context);

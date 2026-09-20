@@ -11,7 +11,7 @@ export * from './prompt-v1';
 export * from './validator';
 
 import { ExtractionEngine } from './extraction-engine';
-import { UnifiedModelService } from '../../../../shared/src/models/unified-service';
+import { UnifiedModelService } from 'shared/models/unified-service';
 import { DeterministicExtractor } from '../../discovery/extraction/deterministic-extractor';
 import type { ExtractionEngineConfig } from './types';
 

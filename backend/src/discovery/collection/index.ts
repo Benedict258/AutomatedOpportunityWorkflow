@@ -1,4 +1,4 @@
-export * from './types';
+export type { CollectionOrchestratorOptions, RateLimitConfig, RawDocument, CollectionOptions, CollectionResult, CollectionMetrics, SourceCollectionContext } from './types';
 export * from './collection-orchestrator';
 export * from './rate-limiter';
 export * from './adapter-registry';

@@ -1,5 +1,5 @@
-import { UnifiedModelService } from '../../models/unified-service';
-import { ModelOperation } from '../../models/types';
+import { UnifiedModelService } from 'shared/models/unified-service';
+import { ModelOperation } from 'shared/models/types';
 import {
   EvaluationDataset,
   EvaluationItem,
@@ -34,7 +34,7 @@ export class DefaultModelEvaluator implements ModelEvaluator {
       const startTime = Date.now();
       try {
         let result: ItemResult;
-        switch (operation) {
+        switch (operation as string) {
           case 'extraction':
             result = await this.evaluateExtraction(item, modelId);
             break;
@@ -92,7 +92,7 @@ export class DefaultModelEvaluator implements ModelEvaluator {
     });
 
     if (!response.success) {
-      return { id: item.id, success: false, error: response.error };
+      return { id: item.id, success: false, errors: [String(response.error || 'Extraction failed')] };
     }
 
     const predicted = response.data?.text ? JSON.parse(response.data.text) : {};
@@ -121,7 +121,7 @@ export class DefaultModelEvaluator implements ModelEvaluator {
     });
 
     if (!response.success) {
-      return { id: item.id, success: false, error: response.error };
+      return { id: item.id, success: false, errors: [String(response.error || 'Classification failed')] };
     }
 
     const predicted = response.data?.text ? JSON.parse(response.data.text) : {};
@@ -150,7 +150,7 @@ export class DefaultModelEvaluator implements ModelEvaluator {
     });
 
     if (!response.success) {
-      return { id: item.id, success: false, error: response.error };
+      return { id: item.id, success: false, errors: [String(response.error || 'Requirement extraction failed')] };
     }
 
     const predicted = response.data?.text ? JSON.parse(response.data.text) : {};
@@ -230,7 +230,7 @@ export class DefaultModelEvaluator implements ModelEvaluator {
     });
 
     if (!response.success) {
-      return { id: item.id, success: false, error: response.error };
+      return { id: item.id, success: false, errors: [String(response.error || 'Reasoning failed')] };
     }
 
     const predicted = response.data?.text ? JSON.parse(response.data.text) : {};

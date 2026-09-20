@@ -7,21 +7,21 @@ import {
   Embedder,
 } from './types';
 import { EmbeddingStore } from './embedding-store';
-import { unifiedModelService, ModelExecutionOptions } from '@shared/models';
+import { unifiedModelService, ModelExecutionOptions } from 'shared/models';
 
 /**
  * Real embedder implementation using the unified model service.
  * Generates embeddings via the configured embedding model slot.
  */
 export class UnifiedModelEmbedder implements Embedder {
-  private modelInfo: EmbeddingModelInfo;
+  private _modelInfo: EmbeddingModelInfo;
 
   constructor(
     private unifiedService: typeof unifiedModelService,
     private modelId: string,
     private defaultDimensions: number = 1536
   ) {
-    this.modelInfo = {
+    this._modelInfo = {
       name: modelId,
       provider: 'unified',
       dimensions: defaultDimensions,
@@ -30,7 +30,7 @@ export class UnifiedModelEmbedder implements Embedder {
   }
 
   get modelInfo(): EmbeddingModelInfo {
-    return this.modelInfo;
+    return this._modelInfo;
   }
 
   async embed(text: string): Promise<number[]> {
@@ -38,7 +38,7 @@ export class UnifiedModelEmbedder implements Embedder {
       texts: [text],
     });
 
-    if (result.data.embeddings.length === 0) {
+    if (!result.data || result.data.embeddings.length === 0) {
       throw new Error('No embedding returned from model');
     }
 
@@ -49,6 +49,10 @@ export class UnifiedModelEmbedder implements Embedder {
     const result = await this.unifiedService.embed('embedding', {
       texts,
     });
+
+    if (!result.data) {
+      throw new Error('No data returned from model');
+    }
 
     return result.data.embeddings;
   }

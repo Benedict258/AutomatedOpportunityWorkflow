@@ -1,2 +1,3 @@
 export * from './source-registry.service';
-export { default as SourceRegistryTypes } from '../../shared/src/registry/types';
+import * as SourceRegistryTypes from 'shared/registry/types';
+export { SourceRegistryTypes };

@@ -110,7 +110,7 @@ export async function startServer(): Promise<FastifyInstance> {
 }
 
 // Start if this is the main module
-const isMainModule = import.meta.url === new URL(process.argv[1], 'file:').href;
+const isMainModule = require.main === module;
 if (isMainModule) {
   startServer().catch((err) => {
     logger.error({ err }, 'Server startup failed');

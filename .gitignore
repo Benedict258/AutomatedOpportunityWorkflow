@@ -8,6 +8,7 @@ dist/
 build/
 backend/dist/
 frontend/dist/
+shared/dist/
 *.tsbuildinfo
 
 # Environment variables
@@ -16,6 +17,8 @@ frontend/dist/
 .env.*.local
 .env.development
 .env.production
+.env.test
+backend/.env.test
 
 # Logs
 logs/
@@ -42,3 +45,9 @@ coverage/
 # Temporary
 .tmp/
 temp/
+backend-errors.txt
+TASK_SUMMARY.json
+test_routes.mjs
+
+# npm symlinks for local packages
+backend/shared/

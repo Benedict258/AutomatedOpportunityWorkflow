@@ -1,4 +1,4 @@
-import { ModelRegistryConfig, ModelProvider, ModelDefinition } from '../../models/types';
+import { ModelRegistryConfig, ModelProvider, ModelDefinition } from '../models/types.js';
 
 function parseEnvArray(value: string): string[] {
   return value.split(',').map(s => s.trim()).filter(Boolean);
@@ -18,7 +18,7 @@ function parseEnvBoolean(value: string, defaultValue: boolean): boolean {
 function getEnvPrefix(prefix: string): Record<string, string> {
   const result: Record<string, string> = {};
   for (const [key, value] of Object.entries(process.env)) {
-    if (key.startsWith(prefix)) {
+    if (key.startsWith(prefix) && value !== undefined) {
       result[key] = value;
     }
   }

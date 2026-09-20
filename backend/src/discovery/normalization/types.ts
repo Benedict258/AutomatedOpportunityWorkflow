@@ -1,4 +1,4 @@
-import { OpportunityStatus, DeadlineType } from '../../../../../shared/src/enums';
+import { OpportunityStatus, DeadlineType } from 'shared/enums';
 
 export type RemoteStatus = 'REMOTE' | 'HYBRID' | 'ONSITE' | 'FLEXIBLE' | 'UNKNOWN';
 

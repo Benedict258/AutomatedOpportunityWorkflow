@@ -61,7 +61,7 @@ describe('Rate Limit Middleware', () => {
       const mockRequest = { requestId: 'req-123' };
       const opts = { max: 100, timeWindow: 60000 };
       
-      const errorResponse = options.errorResponseBuilder(opts, mockRequest);
+      const errorResponse = options.errorResponseBuilder(mockRequest, opts);
       expect(errorResponse).toEqual({
         error: {
           code: 'RATE_LIMITED',

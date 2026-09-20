@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: AutomatedOpportunityWorkflow
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install backend dependencies
+        run: npm ci
+        working-directory: ./backend
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: ./frontend
+
+      - name: Create .env.test for backend
+        run: |
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL_TEST }}" > .env.test
+          echo "JWT_SECRET=test-secret" >> .env.test
+          echo "WEBHOOK_HMAC_SECRET=test-hmac" >> .env.test
+          echo "MODEL_PROVIDER_NVIDIA_API_KEY=test-key" >> .env.test
+        working-directory: ./backend
+
+      - name: Run migrations on test DB
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_TEST }}
+        run: npm run migrate
+        working-directory: ./backend
+
+      - name: Run backend tests
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_TEST }}
+        run: npm test
+        working-directory: ./backend
+
+      - name: Run frontend tests
+        run: npm test
+        working-directory: ./frontend

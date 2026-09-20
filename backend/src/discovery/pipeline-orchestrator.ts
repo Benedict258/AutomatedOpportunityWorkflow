@@ -86,6 +86,7 @@ export class PipelineOrchestrator {
     return {
       stageName: PipelineStageName.SELECT_SOURCES,
       status: 'SUCCESS',
+      startedAt: new Date().toISOString(),
       metadata: {
         requestedSources: context.sources.length,
         sourceIds: context.sources,
@@ -106,6 +107,7 @@ export class PipelineOrchestrator {
     return {
       stageName: PipelineStageName.PREPARE,
       status: 'SUCCESS',
+      startedAt: new Date().toISOString(),
       metadata: { preparedCount: context.sources.length },
       sourceResults,
     };
@@ -127,6 +129,7 @@ export class PipelineOrchestrator {
     return {
       stageName: PipelineStageName.EXECUTE_SOURCES,
       status: 'SUCCESS',
+      startedAt: new Date().toISOString(),
       metadata: { executedCount: context.sources.length },
       sourceResults,
     };
@@ -137,6 +140,7 @@ export class PipelineOrchestrator {
     return {
       stageName: PipelineStageName.AGGREGATE,
       status: 'SUCCESS',
+      startedAt: new Date().toISOString(),
       metadata: { aggregated: true },
     };
   }
@@ -146,6 +150,7 @@ export class PipelineOrchestrator {
     return {
       stageName: PipelineStageName.COMPLETE,
       status: 'SUCCESS',
+      startedAt: new Date().toISOString(),
       metadata: { completedAt: new Date().toISOString() },
     };
   }

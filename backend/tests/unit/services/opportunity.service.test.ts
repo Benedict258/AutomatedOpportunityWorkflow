@@ -3,6 +3,40 @@ import { OpportunityService } from '@/services/opportunity.service.js';
 import { createTestOpportunity } from '@tests/factories.js';
 import { executeQuery } from '@/db/connection';
 
+vi.mock('../../../src/persistence/pg-opportunity-repository.js', () => ({
+  PgOpportunityRepository: vi.fn().mockImplementation(() => ({
+    upsert: vi.fn().mockResolvedValue({
+      id: 'opp-123',
+      stable_id: 'stable-123',
+      source_id: 'source-123',
+      external_id: 'ext-123',
+      title: 'New Opportunity',
+      organization: 'Org',
+      description: null,
+      url: null,
+      location: null,
+      remote_info: null,
+      opportunity_type: null,
+      category_ids: [],
+      status: 'active',
+      publication_date: null,
+      application_deadline: null,
+      deadline_type: 'hard',
+      first_seen_at: new Date().toISOString(),
+      last_seen_at: new Date().toISOString(),
+      last_verified_at: null,
+      closed_at: null,
+      lifecycle_stage: null,
+      embedding: null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }),
+    findBySourceAndExternal: vi.fn().mockResolvedValue(null),
+    getById: vi.fn().mockResolvedValue(null),
+    list: vi.fn().mockResolvedValue([]),
+  })),
+}));
+
 vi.mock('../../../src/persistence/opportunity-persister.js', () => ({
   OpportunityPersister: vi.fn().mockImplementation(() => ({
     persist: vi.fn().mockResolvedValue({ inserted: 1, updated: 0, opportunities: [createTestOpportunity()] }),
@@ -13,12 +47,14 @@ vi.mock('../../../src/discovery/versioning/version-manager.js', () => ({
   VersionManager: vi.fn().mockImplementation(() => ({
     createVersion: vi.fn().mockResolvedValue(undefined),
     getLifecycle: vi.fn().mockResolvedValue([]),
+    getVersions: vi.fn().mockReturnValue([]),
   })),
 }));
 
 vi.mock('../../../src/intelligence/timing/timing-intelligence-engine.js', () => ({
   TimingIntelligenceEngine: vi.fn().mockImplementation(() => ({
     analyze: vi.fn().mockResolvedValue({ deadline: '2024-12-31', daysRemaining: 30 }),
+    assess: vi.fn().mockReturnValue({ deadline: '2024-12-31', daysRemaining: 30 }),
   })),
 }));
 
@@ -152,11 +188,10 @@ describe('OpportunityService', () => {
     const service = new OpportunityService();
     const versions = [{ id: 'v1', versionNumber: 1 }, { id: 'v2', versionNumber: 2 }];
     
-    // Mock the version manager instance
     const { VersionManager } = await import('../../../src/discovery/versioning/version-manager.js');
     const versionManagerInstance = vi.mocked(VersionManager).mock.results[0]?.value;
     if (versionManagerInstance) {
-      vi.spyOn(versionManagerInstance, 'getLifecycle').mockResolvedValue(versions);
+      vi.spyOn(versionManagerInstance, 'getVersions').mockReturnValue(versions as any);
     }
     
     const result = await service.getVersions('opp-123');

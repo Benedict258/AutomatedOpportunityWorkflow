@@ -1,4 +1,4 @@
-import type { SourceRegistryEntry } from '../../../shared/src/registry/types';
+import type { SourceRegistryEntry } from 'shared/registry/types';
 import { BaseSourceAdapter } from './base-adapter';
 import type {
   FetchOptions,
@@ -11,7 +11,7 @@ import {
   NetworkFailureError,
   SourceUnavailableError,
 } from './errors';
-import { SourceType } from '../../../shared/src/registry/types';
+import { SourceType } from 'shared/registry/types';
 
 /**
  * Generic API Adapter Skeleton

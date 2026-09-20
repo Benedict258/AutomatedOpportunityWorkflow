@@ -1,13 +1,9 @@
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { getPool, executeQuery } from './connection.js';
 import { logger } from '../utils/logger.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const MIGRATIONS_DIR = path.resolve(__dirname, '../../migrations');
+const MIGRATIONS_DIR = path.resolve(__dirname ?? process.cwd(), '../../migrations');
 const MIGRATION_TABLE = 'schema_migrations';
 
 export async function ensureMigrationTable(): Promise<void> {

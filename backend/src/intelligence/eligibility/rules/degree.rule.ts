@@ -21,7 +21,7 @@ export function degreeRule(candidate: EligibilityContext['candidate'], requireme
     return makeDecision(reqId, reqDesc, candidateField, 'UNCERTAIN', 'Candidate degree missing', undefined, 0);
   }
   
-  const actualRank = DEGREE_RANK[actual] ?? 0;
+  const actualRank = DEGREE_RANK[actual!] ?? 0;
   const requiredRank = DEGREE_RANK[String(required).toLowerCase()] ?? 0;
   
   let eligible = false;

@@ -20,6 +20,9 @@ export class ModelRegistry {
     reasoning: '',
     matching: '',
     reranking: '',
+    'requirement-extraction': '',
+    'semantic-matching': '',
+    'candidate-intelligence': '',
   };
   private healthCache: Map<string, ModelHealthCheck> = new Map();
   private healthCacheTTL = 60000;

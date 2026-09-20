@@ -8,8 +8,10 @@ import { DeduplicationEngine } from '../deduplication';
 import { FreshnessEngine } from '../freshness';
 import { VersionManager } from '../versioning';
 import { OpportunityPersister } from '../../persistence/opportunity-persister';
+import { PgOpportunityRepository } from '../../persistence/pg-opportunity-repository.js';
 import { USAJobsAdapter } from '../../adapters/usajobs-adapter';
-import type { PipelineStageInput, PipelineStageOutput, PipelineContext, DiscoveryPipelineResult, PipelineStageName, PipelineMetrics } from './types';
+import type { PipelineStageInput, PipelineStageOutput, PipelineContext, DiscoveryPipelineResult, PipelineMetrics } from './types';
+import { PipelineStageName } from './types';
 import type { QueryPlan } from '../strategy/types';
 import type { CollectionResult, RawDocument } from '../collection/types';
 import type { ExtractionResult } from '../extraction/types';
@@ -29,7 +31,7 @@ interface PipelineOptions {
   dedupEngine?: DeduplicationEngine;
   freshnessEngine?: FreshnessEngine;
   versionManager?: VersionManager;
-  persister?: OpportunityPersister;
+  persister?: PgOpportunityRepository;
 }
 
 export class DiscoveryPipeline {
@@ -38,7 +40,7 @@ export class DiscoveryPipeline {
   constructor(options: PipelineOptions = {}) {
     this.options = {
       strategyEngine: options.strategyEngine ?? new DiscoveryStrategyEngine({
-        taxonomyService: new TaxonomyService(),
+        taxonomyService: new TaxonomyService(''),
         config: {},
       }),
       collectionOrchestrator: options.collectionOrchestrator ?? new CollectionOrchestrator(),
@@ -48,7 +50,7 @@ export class DiscoveryPipeline {
       dedupEngine: options.dedupEngine ?? new DeduplicationEngine(),
       freshnessEngine: options.freshnessEngine ?? new FreshnessEngine(),
       versionManager: options.versionManager ?? new VersionManager(),
-      persister: options.persister ?? new OpportunityPersister(),
+      persister: options.persister ?? new PgOpportunityRepository(),
     };
   }
 
@@ -119,9 +121,7 @@ export class DiscoveryPipeline {
           const rawItems = (raw as any)?.SearchResult?.SearchResultItems ?? [];
           const docs: RawDocument[] = rawItems.map((item: any, idx: number) => ({
             sourceId,
-            documentId: `${sourceId}-${item.MatchedObjectId ?? idx}`,
             collectedAt: new Date().toISOString(),
-            contentType: 'application/json',
             rawData: item,
             metadata: { adapterId: 'usajobs-api-adapter', index: idx },
           }));
@@ -168,10 +168,8 @@ export class DiscoveryPipeline {
       // Minimal RawDocument shape for extraction engine
       const batch = docs.map(d => ({
         ...d,
-        documentId: d.documentId,
         sourceId: d.sourceId,
         collectedAt: d.collectedAt,
-        contentType: d.contentType ?? 'application/json',
         rawData: d.rawData,
       })) as any;
       const { results, metrics } = await this.options.extractionEngine.extractBatch(batch);
@@ -290,15 +288,23 @@ export class DiscoveryPipeline {
     // 9. Persistence
     const persistenceOut = await runStage(PipelineStageName.PERSISTENCE, async () => {
       const normalized = (context.normalized ?? []).map(n => n.normalizedOpportunity);
-      // Adapt NormalizedOpportunity to persister shape
-      const toPersist = normalized.map(o => ({
-        ...o,
-        sourceId: o.source,
-        externalId: o.externalId,
-      })) as any;
-      const result = await this.options.persister.persist(toPersist);
-      context.persisted = result;
-      return result;
+      const results = { inserted: 0, updated: 0, skipped: 0, opportunities: [] as any[] };
+      for (const o of normalized) {
+        try {
+          const sourceInternalId = o.source; // assume source ID is internal UUID
+          const row = await this.options.persister.upsert({
+            ...o,
+            sourceId: o.source,
+            externalId: o.externalId,
+          } as any, sourceInternalId, undefined, context.runId);
+          results.inserted++;
+          results.opportunities.push({ id: row.id, stableId: row.stable_id, externalId: row.external_id });
+        } catch (e) {
+          results.skipped++;
+        }
+      }
+      context.persisted = results;
+      return results;
     });
     stages.push(persistenceOut);
 

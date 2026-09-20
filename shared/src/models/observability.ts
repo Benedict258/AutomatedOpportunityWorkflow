@@ -43,7 +43,6 @@ export class ModelObservability {
 
   constructor(config: ModelObservabilityConfig) {
     this.config = {
-      enabled: true,
       samplingRate: 1.0,
       logLevel: 'info',
       ...config,

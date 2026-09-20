@@ -1,4 +1,4 @@
-import { UnifiedModelService } from '../../models/unified-service';
+import { UnifiedModelService } from 'shared/models/unified-service';
 import { DefaultModelEvaluator, createModelEvaluator } from './evaluator';
 import { EvaluationConfig } from './types';
 import { ALL_DATASETS } from './dataset';
@@ -9,7 +9,7 @@ export class EvaluationRunner {
 
   constructor(modelService: UnifiedModelService) {
     this.modelService = modelService;
-    this.evaluator = createModelEvaluator(modelService);
+    this.evaluator = createModelEvaluator(modelService) as DefaultModelEvaluator;
   }
 
   async run(config: EvaluationConfig): Promise<void> {

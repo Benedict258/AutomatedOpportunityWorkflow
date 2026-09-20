@@ -57,7 +57,7 @@ Output JSON only.`;
     try {
       const cleaned = response.replace(/```json|```/g, '').trim();
       const data = JSON.parse(cleaned);
-      const results: ClassificationResult[] = Array.isArray(data) ? data : [data];
+      const results: any[] = Array.isArray(data) ? data : [data];
       const topK = options?.topK ?? 5;
       const minConfidence = options?.minConfidence ?? 0.3;
 
@@ -66,12 +66,12 @@ Output JSON only.`;
           const score = Number(item.confidenceScore ?? item.confidence ?? 0);
           const level: ClassificationConfidenceLevel = score >= 0.7 ? 'high' : score >= 0.4 ? 'medium' : 'low';
           return {
-            categoryId: String(item.categoryId || item.id || ''),
-            categoryName: String(item.categoryName || item.name || ''),
+            categoryId: String(item.categoryId || (item as any).id || ''),
+            categoryName: String(item.categoryName || (item as any).name || ''),
             confidence: {
               score: Math.min(1, Math.max(0, score)),
               level,
-              reasoning: String(item.reasoning || '')
+              reasoning: String((item as any).reasoning || '')
             },
             source: 'llm' as const,
             path: [],

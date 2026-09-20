@@ -139,8 +139,8 @@ export class ApplicationService {
     return (result.rowCount ?? 0) > 0;
   }
 
-  async getForCandidate(candidateId: string, filters: ApplicationFilters = {}): Promise<{ data: Application[]; total: number }> {
-    return this.list({ ...filters, userId: candidateId });
+  async getForCandidate(candidateId: string, filters: ApplicationFilters = {} as ApplicationFilters): Promise<{ data: Application[]; total: number }> {
+    return this.list({ ...filters, userId: candidateId } as ApplicationFilters);
   }
 
   // Reminder methods

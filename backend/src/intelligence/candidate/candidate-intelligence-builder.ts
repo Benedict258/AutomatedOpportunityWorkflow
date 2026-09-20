@@ -1,4 +1,4 @@
-import type { CandidateProfile } from '@shared/domain/candidate';
+import type { CandidateProfile } from 'shared/domain/candidate';
 import type { CandidateIntelligence, DerivedCandidateProfile, Provenance } from './types';
 import { deriveProfile } from './profile-derivation';
 
@@ -23,7 +23,7 @@ export function buildCandidateIntelligence({
   const provenance: Provenance = {
     derivedFrom: {
       candidateProfileId: candidateProfile.id,
-      version: candidateProfile.version?.toString(),
+      version: (candidateProfile as any).version?.toString(),
     },
     derivedAt,
     derivedBy: 'candidate-intelligence-builder',

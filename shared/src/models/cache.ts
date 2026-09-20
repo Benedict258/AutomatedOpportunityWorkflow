@@ -35,7 +35,6 @@ export class ModelCache {
 
   constructor(config: ModelCacheConfig) {
     this.config = {
-      enabled: true,
       defaultTTLMs: 3600000,
       maxSize: 10000,
       ...config,
@@ -168,4 +167,8 @@ export function createModelCache(config?: Partial<ModelCacheConfig>): ModelCache
     maxSize: 10000,
     ...config,
   });
+}
+
+export function generateKey(operation: ModelOperation, modelId: string, promptVersion: string, inputHash: string): string {
+  return `model:${operation}:${modelId}:${promptVersion}:${inputHash}`;
 }

@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+// @ts-ignore
 import yaml from 'js-yaml';
 
 export interface TaxonomyNode {

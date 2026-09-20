@@ -11,7 +11,7 @@
  * Distinguishes EXPLICIT / DERIVED / INFERRED / UNKNOWN relationship types.
  */
 
-import type { CandidateProfile } from '@shared/domain/candidate';
+import type { CandidateProfile } from 'shared/domain/candidate';
 import type { 
   CandidateIntelligence, 
   DerivedCandidateProfile, 
@@ -25,7 +25,7 @@ import {
   unifiedModelService, 
   UnifiedModelService, 
   ModelExecutionOptions 
-} from '@shared/models';
+} from 'shared/models';
 import { 
   buildCandidateIntelligencePrompt, 
   CANDIDATE_INTELLIGENCE_JSON_SCHEMA,
@@ -190,7 +190,7 @@ export class RealCandidateIntelligenceEngine {
 
     // Step 1: Build deterministic intelligence (always runs)
     const deterministicStartTime = Date.now();
-    const baseIntelligence = buildCandidateIntelligence({
+    let baseIntelligence = buildCandidateIntelligence({
       candidateId,
       candidateProfile,
       derivationVersion,
@@ -201,7 +201,7 @@ export class RealCandidateIntelligenceEngine {
     if (this.enableModelAnalysis && this.unifiedService.isInitialized()) {
       try {
         modelAnalysis = await this.runModelAnalysis(candidateProfile, traceId);
-        modelLatencyMs = modelAnalysis._meta?.latencyMs || 0;
+        modelLatencyMs = (modelAnalysis as any)._meta?.latencyMs || 0;
         
         // Check if model analysis meets confidence threshold
         const avgConfidence = modelAnalysis.signals.length > 0
@@ -251,10 +251,12 @@ export class RealCandidateIntelligenceEngine {
             candidateProfile,
             { forceRegenerate: forceRegenerateEmbedding }
           );
-          embedding = {
-            vector: result.vector,
-            metadata: result.metadata,
-          };
+          if (result) {
+            embedding = {
+              vector: result.vector,
+              metadata: result.metadata as NonNullable<RealCandidateIntelligenceResult['embedding']>['metadata'],
+            };
+          }
         } else if (this.candidateEmbedder) {
           // Use embedder directly (no persistence)
           const vector = await this.candidateEmbedder.embedCandidate(candidateProfile);
@@ -322,12 +324,12 @@ export class RealCandidateIntelligenceEngine {
       provenance: {
         primaryBuilder,
         modelAnalysis: modelAnalysis ? {
-          modelId: modelAnalysis._meta?.modelId || '',
-          modelVersion: modelAnalysis._meta?.modelVersion || '',
+          modelId: (modelAnalysis as any)._meta?.modelId || '',
+          modelVersion: (modelAnalysis as any)._meta?.modelVersion || '',
           promptVersion: CANDIDATE_INTELLIGENCE_PROMPT_VERSION,
           promptHash: getCandidateIntelligencePromptHash(),
-          latencyMs: modelAnalysis._meta?.latencyMs || 0,
-          tokenUsage: modelAnalysis._meta?.tokenUsage,
+          latencyMs: (modelAnalysis as any)._meta?.latencyMs || 0,
+          tokenUsage: (modelAnalysis as any)._meta?.tokenUsage,
         } : undefined,
         embedding: embedding ? {
           modelId: embedding.metadata.model,
@@ -381,7 +383,7 @@ export class RealCandidateIntelligenceEngine {
           promptVersion: CANDIDATE_INTELLIGENCE_PROMPT_VERSION,
         }
       }
-    ) as ModelExecutionResult<ModelAnalysisResult>;
+    ) as unknown as ModelExecutionResult<ModelAnalysisResult>;
 
     const latencyMs = Date.now() - modelStartTime;
 
@@ -432,7 +434,6 @@ export class RealCandidateIntelligenceEngine {
     const mainProvenance: Provenance = {
       derivedFrom: {
         candidateProfileId: profile.id,
-        version: profile.version?.toString(),
       },
       derivedAt,
       derivedBy: 'real-candidate-intelligence-engine',
@@ -496,10 +497,12 @@ export class RealCandidateIntelligenceEngine {
         options.candidateProfile,
         { forceRegenerate: options.forceRegenerateEmbedding }
       );
-      embedding = {
-        vector: result.vector,
-        metadata: result.metadata,
-      };
+      if (result) {
+        embedding = {
+          vector: result.vector,
+          metadata: result.metadata as NonNullable<RealCandidateIntelligenceResult['embedding']>['metadata'],
+        };
+      }
       embeddingLatencyMs = Date.now() - embeddingStartTime;
     }
 
@@ -621,7 +624,8 @@ export async function createRealCandidateIntelligenceEngine(
 /**
  * Re-export key types and functions for convenience
  */
-export { buildCandidateIntelligence, deriveProfile } from './candidate-intelligence-builder';
+export { buildCandidateIntelligence } from './candidate-intelligence-builder';
+export { deriveProfile } from './profile-derivation';
 export { buildCandidateIntelligencePrompt, CANDIDATE_INTELLIGENCE_JSON_SCHEMA, CANDIDATE_INTELLIGENCE_PROMPT_VERSION, getCandidateIntelligencePromptHash } from './prompt-v1';
 export { CandidateEmbedder, buildCandidateEmbeddingText, CandidateEmbeddingService, createCandidateEmbeddingService } from './candidate-embedder';
 export type { CandidateIntelligence, DerivedCandidateProfile, Provenance, CandidateSkill, CandidateExperience } from './types';

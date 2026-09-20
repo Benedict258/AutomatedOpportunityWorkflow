@@ -30,6 +30,7 @@ export function errorHandler(fastify: FastifyInstance): void {
     if (error instanceof ZodError) {
       return reply.code(400).send({
         error: {
+          type: 'https://automated-opportunity-workflow.com/errors/validation_error',
           code: 'VALIDATION_ERROR',
           title: 'Validation Error',
           message: 'Request validation failed',
@@ -39,7 +40,7 @@ export function errorHandler(fastify: FastifyInstance): void {
             field: e.path.join('.'),
             message: e.message,
             code: e.code,
-          })),
+          })) as unknown as Record<string, unknown>,
         } as ProblemDetails,
       });
     }
@@ -48,6 +49,7 @@ export function errorHandler(fastify: FastifyInstance): void {
     if (error.validation) {
       return reply.code(400).send({
         error: {
+          type: 'https://automated-opportunity-workflow.com/errors/validation_error',
           code: 'VALIDATION_ERROR',
           title: 'Validation Error',
           message: 'Request validation failed',
@@ -57,7 +59,7 @@ export function errorHandler(fastify: FastifyInstance): void {
             field: v.instancePath || v.schemaPath,
             message: v.message,
             code: 'VALIDATION_ERROR',
-          })),
+          })) as unknown as Record<string, unknown>,
         } as ProblemDetails,
       });
     }
@@ -89,6 +91,7 @@ export function errorHandler(fastify: FastifyInstance): void {
   fastify.setNotFoundHandler(async (request: FastifyRequest, reply: FastifyReply) => {
     reply.code(404).send({
       error: {
+        type: 'https://automated-opportunity-workflow.com/errors/not_found',
         code: 'NOT_FOUND',
         title: 'Not Found',
         message: `Route ${request.method} ${request.url} not found`,

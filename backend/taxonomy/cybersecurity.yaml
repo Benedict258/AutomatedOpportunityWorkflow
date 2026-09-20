@@ -1,0 +1,92 @@
+nodes:
+  - id: cybersecurity
+    name: CYBERSECURITY
+    parent: null
+    active: true
+
+  - id: cybersecurity.foundations
+    name: Foundations
+    parent: cybersecurity
+    active: true
+
+  - id: cybersecurity.network_security
+    name: Network Security
+    parent: cybersecurity
+    active: true
+
+  - id: cybersecurity.application_security
+    name: Application Security
+    parent: cybersecurity
+    active: true
+
+  - id: cybersecurity.cloud_security
+    name: Cloud Security
+    parent: cybersecurity
+    active: true
+    related_to: [technology.cloud, government.cybersecurity]
+
+  - id: cybersecurity.security_operations
+    name: Security Operations
+    parent: cybersecurity
+    active: true
+
+  - id: cybersecurity.threat_intelligence
+    name: Threat Intelligence
+    parent: cybersecurity
+    active: true
+
+  - id: cybersecurity.digital_forensics
+    name: Digital Forensics
+    parent: cybersecurity
+    active: true
+
+  - id: cybersecurity.incident_response
+    name: Incident Response
+    parent: cybersecurity
+    active: true
+
+  - id: cybersecurity.penetration_testing
+    name: Penetration Testing
+    parent: cybersecurity
+    active: true
+
+  - id: cybersecurity.vulnerability_management
+    name: Vulnerability Management
+    parent: cybersecurity
+    active: true
+
+  - id: cybersecurity.identity_access_management
+    name: Identity & Access Management
+    parent: cybersecurity
+    active: true
+
+  - id: cybersecurity.governance_risk_compliance
+    name: Governance Risk & Compliance
+    parent: cybersecurity
+    active: true
+
+  - id: cybersecurity.security_engineering
+    name: Security Engineering
+    parent: cybersecurity
+    active: true
+
+  - id: cybersecurity.secure_software
+    name: Secure Software
+    parent: cybersecurity
+    active: true
+
+  - id: cybersecurity.cyber_policy
+    name: Cyber Policy
+    parent: cybersecurity
+    active: true
+    related_to: [policy.cyber_policy]
+
+  - id: cybersecurity.cyber_intelligence
+    name: Cyber Intelligence
+    parent: cybersecurity
+    active: true
+
+  - id: cybersecurity.security_research
+    name: Security Research
+    parent: cybersecurity
+    active: true

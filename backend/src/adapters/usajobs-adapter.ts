@@ -1,194 +1,144 @@
 import { BaseSourceAdapter } from './base-adapter';
-import type { SourceRegistryEntry } from '../../../shared/src/registry/types';
+import type { SourceRegistryEntry } from 'shared/registry/types';
 import type { FetchOptions, DiscoverOptions, NormalizedOpportunity } from './types';
-import { SourceCategory, SourceType, AccessMethod } from '../../../shared/src/registry/types';
-import { AuthenticationFailureError, SourceUnavailableError, NetworkFailureError, MalformedResponseError, ParsingFailureError } from './errors';
+import { SourceType, SourceCategory } from 'shared/registry/types';
+import { AuthenticationFailureError, NetworkFailureError, SourceUnavailableError } from './errors';
 
-// Fixture data for development when API key unavailable
-const USAJOBS_FIXTURE = {
+interface USAJOBSResponse {
   SearchResult: {
-    SearchResultCount: 2,
-    SearchResultCountAll: 2,
-    SearchResultItems: [
-      {
-        MatchedObjectId: '21947200',
-        MatchedObjectDescriptor: {
-          PositionID: 'SW62210-05-1716110PB411413H',
-          PositionTitle: 'IT Specialist (InfoSec/Network)',
-          PositionURI: 'https://www.usajobs.gov/GetJob/ViewDetails/21947200',
-          ApplyURI: ['https://www.usajobs.gov/GetJob/ViewDetails/21947200?PostingChannelID=RESTAPI'],
-          PositionLocationDisplay: 'Point Loma Complex, San Diego, California',
-          PositionLocation: [{
-            LocationName: 'Point Loma Complex, San Diego, California',
-            CountryCode: 'United States',
-            CountrySubDivisionCode: 'California'
-          }],
-          OrganizationName: 'Space and Naval Warfare Systems Command',
-          DepartmentName: 'Department of the Navy',
-          JobCategory: [
-            { Name: 'Information Technology', Code: '2200' },
-            { Name: 'Information Technology Management', Code: '2210' }
-          ],
-          PositionSchedule: [{ Name: 'Full Time', Code: '1' }],
-          PositionOfferingType: [{ Name: 'Permanent', Code: '15317' }],
-          QualificationSummary: 'IT specialist role',
-          PositionRemuneration: [{
-            MinimumRange: '92108',
-            MaximumRange: '119746',
-            RateIntervalCode: 'PA',
-            Description: 'Per Year'
-          }],
-          PublicationStartDate: '2016-06-05T00:00:00Z',
-          ApplicationCloseDate: '2016-12-01T00:00:00Z',
-          UserArea: {
-            Details: {
-              JobSummary: 'Major duties and responsibilities',
-              WhoMayApply: { Name: 'United States Citizens', Code: '15514' }
-            }
-          }
-        },
-        RelevanceRank: 0.0
-      },
-      {
-        MatchedObjectId: '98765432',
-        MatchedObjectDescriptor: {
-          PositionID: 'ABC123-01-999',
-          PositionTitle: 'Data Analyst',
-          PositionURI: 'https://www.usajobs.gov/GetJob/ViewDetails/98765432',
-          PositionLocationDisplay: 'Remote',
-          PositionLocation: [{
-            LocationName: 'Remote',
-            CountryCode: 'United States'
-          }],
-          OrganizationName: 'Department of Veterans Affairs',
-          DepartmentName: 'Department of Veterans Affairs',
-          JobCategory: [{ Name: 'Information Technology', Code: '2200' }],
-          PositionSchedule: [{ Name: 'Full Time', Code: '1' }],
-          PositionOfferingType: [{ Name: 'Permanent', Code: '15317' }],
-          PublicationStartDate: '2025-09-01T00:00:00Z',
-          ApplicationCloseDate: null,
-          UserArea: {
-            Details: {
-              JobSummary: 'Data analyst remote role',
-              WhoMayApply: { Name: 'Public', Code: '15515' }
-            }
-          }
-        }
-      }
-    ]
-  }
-};
+    SearchResultCount: number;
+    SearchResultItems: USAJOBSItem[];
+  };
+}
+
+interface USAJOBSItem {
+  MatchedObjectDescriptor: {
+    PositionID: string;
+    PositionTitle: string;
+    PositionURI: string;
+    ApplyURI?: string;
+    PositionLocation?: Array<{ LocationName: string }>;
+    OrganizationName?: string;
+    PositionRemarks?: string;
+    QualificationSummary?: string;
+    PositionScheduleTypeCode?: string[];
+    HiringPath?: string[];
+    RemoteIndicator?: string;
+    PositionStartDate?: string;
+    PositionEndDate?: string;
+    WhoMayApply?: string;
+    PositionOfferingTypeCode?: string[];
+    PositionTypeCode?: string[];
+  };
+}
 
 export class USAJobsAdapter extends BaseSourceAdapter {
   public readonly adapterId = 'usajobs-api-adapter';
-  private readonly baseUrl = 'https://data.usajobs.gov';
-  private readonly endpointPath = '/api/search';
+  private readonly baseUrl = process.env.USAJOBS_BASE_URL || 'https://data.usajobs.gov';
 
   supports(source: SourceRegistryEntry): boolean {
     return (
-      source.source_id === 'gov_usajobs_001' &&
       source.source_type === SourceType.API &&
-      source.category === SourceCategory.GOVERNMENT
+      source.category === SourceCategory.EMPLOYMENT &&
+      (source.name.toLowerCase().includes('usajobs') || (source.organization?.toLowerCase().includes('usajobs') ?? false))
     );
   }
 
   async discover(options: DiscoverOptions): Promise<string[]> {
-    const sourceId = options.sourceId;
-    // Discovery returns external IDs available
-    // For USAJobs, we can query with minimal params to get recent IDs
-    const raw = await this.fetch({ sourceId, limit: options.maxItems ?? 10 });
-    const items = this.extractItems(raw);
-    return items.map(item => item.MatchedObjectId);
+    const raw = await this.fetch({ sourceId: options.sourceId, limit: options.maxItems ?? 20 });
+    const items = (raw as USAJOBSResponse)?.SearchResult?.SearchResultItems ?? [];
+    return items.map((i) => i.MatchedObjectDescriptor.PositionID);
   }
 
   async fetch(options: FetchOptions): Promise<unknown> {
-    const sourceId = options.sourceId;
-    
-    // Check credentials availability
-    const credentialsAvailable = this.hasCredentials(sourceId);
-    
-    if (!credentialsAvailable) {
-      // Use fixture data for development
-      // Real implementation would throw AuthenticationFailureError
-      return USAJOBS_FIXTURE;
+    const apiKey = process.env.USAJOBS_API_KEY;
+    const userAgent = process.env.USAJOBS_USER_AGENT;
+    const maxPages = Number(process.env.USAJOBS_MAX_PAGES) || 5;
+    const perPage = Number(process.env.USAJOBS_RESULTS_PER_PAGE) || 20;
+    const maxResults = Number(process.env.USAJOBS_MAX_RESULTS) || 100;
+
+    if (!apiKey || !userAgent) {
+      throw new AuthenticationFailureError('USAJOBS API key or User-Agent not configured', options.sourceId);
     }
 
-    try {
-      const url = this.buildUrl(sourceId, options);
-      const headers = this.buildHeaders(sourceId);
-      
-      // In real implementation, perform HTTP GET
-      // const response = await fetch(url, { headers });
-      // if (!response.ok) { ... }
-      // return await response.json();
-      
-      throw new SourceUnavailableError('Real fetch not implemented without credentials', sourceId);
-    } catch (err) {
-      this.handleError(err, sourceId, 'fetch');
+    const allItems: USAJOBSItem[] = [];
+    let page = 1;
+    let totalCollected = 0;
+
+    while (page <= maxPages && totalCollected < maxResults) {
+      const url = new URL(`${this.baseUrl}/api/search`);
+      url.searchParams.set('Keyword', (options.filters?.keyword as string) || 'software');
+      url.searchParams.set('ResultsPerPage', String(perPage));
+      url.searchParams.set('Page', String(page));
+      url.searchParams.set('Fields', 'Full');
+
+      const response = await fetch(url.toString(), {
+        method: 'GET',
+        headers: {
+          'Host': 'data.usajobs.gov',
+          'User-Agent': userAgent,
+          'Authorization-Key': apiKey,
+          'Accept': 'application/json',
+        },
+        signal: AbortSignal.timeout(30000),
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new AuthenticationFailureError('USAJOBS authentication failed', options.sourceId);
+        }
+        if (response.status === 429) {
+          throw new NetworkFailureError('USAJOBS rate limit exceeded', options.sourceId);
+        }
+        if (response.status >= 500) {
+          throw new SourceUnavailableError('USAJOBS service unavailable', options.sourceId);
+        }
+        throw new NetworkFailureError(`USAJOBS HTTP ${response.status}`, options.sourceId);
+      }
+
+      const data = (await response.json()) as USAJOBSResponse;
+      const items = data.SearchResult?.SearchResultItems ?? [];
+      allItems.push(...items);
+      totalCollected += items.length;
+
+      if (items.length < perPage) break;
+      page++;
     }
+
+    return { SearchResult: { SearchResultCount: allItems.length, SearchResultItems: allItems } };
   }
 
   async normalize(raw: unknown, sourceId: string): Promise<NormalizedOpportunity[]> {
-    if (!raw || typeof raw !== 'object') {
-      this.wrapMalformedResponse(sourceId, raw);
-    }
+    const response = raw as USAJOBSResponse;
+    const items = response.SearchResult?.SearchResultItems ?? [];
+    const now = new Date().toISOString();
 
-    try {
-      const items = this.extractItems(raw);
-      const now = new Date().toISOString();
-      const normalized: NormalizedOpportunity[] = [];
+    return items.map((item) => {
+      const desc = item.MatchedObjectDescriptor;
+      const location = desc.PositionLocation?.[0]?.LocationName;
+      const remote = desc.RemoteIndicator === '1' ? { remote: true } : {};
+      const deadline = desc.PositionEndDate ? new Date(desc.PositionEndDate).toISOString() : null;
+      const pubDate = desc.PositionStartDate ? new Date(desc.PositionStartDate).toISOString() : now;
 
-      for (const item of items) {
-        const desc = item.MatchedObjectDescriptor;
-        if (!desc) continue;
-
-        const externalId = item.MatchedObjectId ?? desc.PositionID;
-        const publicationDate = desc.PublicationStartDate ?? undefined;
-        const applicationDeadline = desc.ApplicationCloseDate ?? null;
-        const deadlineType = applicationDeadline ? 'FIXED' : 'UNKNOWN';
-
-        const location = desc.PositionLocationDisplay ??
-          desc.PositionLocation?.[0]?.LocationName ??
-          undefined;
-
-        const remoteInfo = location?.toLowerCase().includes('remote') 
-          ? { isRemote: true, location }
-          : { isRemote: false, location };
-
-        const normalizedUrl = desc.PositionURI ? desc.PositionURI.toLowerCase().trim() : undefined;
-
-        const opportunity: NormalizedOpportunity = {
-          sourceId,
-          externalId,
-          title: desc.PositionTitle ?? '',
-          organization: desc.OrganizationName,
-          description: desc.UserArea?.Details?.JobSummary ?? desc.QualificationSummary,
-          url: desc.PositionURI,
-          location,
-          remoteInfo,
-          opportunityType: desc.PositionOfferingType?.[0]?.Name,
-          categoryIds: desc.JobCategory?.map(c => c.Code) ?? [],
-          status: 'OPEN',
-          publicationDate,
-          applicationDeadline,
-          deadlineType,
-          firstSeenAt: now,
-          lastSeenAt: now,
-          rawData: {
-            eligibility: desc.UserArea?.Details?.WhoMayApply,
-            department: desc.DepartmentName,
-            jobCategory: desc.JobCategory,
-            remuneration: desc.PositionRemuneration,
-          }
-        };
-
-        normalized.push(opportunity);
-      }
-
-      return normalized;
-    } catch (err) {
-      this.wrapParsingFailure(sourceId, err);
-    }
+      return {
+        sourceId,
+        externalId: desc.PositionID,
+        title: desc.PositionTitle,
+        organization: desc.OrganizationName,
+        description: [desc.PositionRemarks, desc.QualificationSummary].filter(Boolean).join('\n\n') || undefined,
+        url: desc.ApplyURI || desc.PositionURI,
+        location,
+        remoteInfo: remote,
+        opportunityType: desc.PositionScheduleTypeCode?.[0] || 'FULL_TIME',
+        status: 'OPEN',
+        publicationDate: pubDate,
+        applicationDeadline: deadline,
+        deadlineType: deadline ? 'HARD' : 'NONE',
+        firstSeenAt: now,
+        lastSeenAt: now,
+        rawData: item,
+      };
+    });
   }
 
   protected getSourceType(): string {
@@ -200,7 +150,7 @@ export class USAJobsAdapter extends BaseSourceAdapter {
   }
 
   protected supportsSearch(): boolean {
-    return true;
+    return false;
   }
 
   protected supportsPagination(): boolean {
@@ -208,51 +158,22 @@ export class USAJobsAdapter extends BaseSourceAdapter {
   }
 
   async ping(sourceId: string): Promise<void> {
-    const credentialsAvailable = this.hasCredentials(sourceId);
-    if (!credentialsAvailable) {
-      // Simulate degraded health
-      throw new AuthenticationFailureError('API key not configured for USAJobs', sourceId);
-    }
-    // Real ping would HEAD baseUrl
-  }
-
-  private hasCredentials(sourceId: string): boolean {
-    // Check environment for USAJOBS_API_KEY
-    // For now, credentials are unavailable
-    return false;
-  }
-
-  private buildHeaders(sourceId: string): Record<string, string> {
     const apiKey = process.env.USAJOBS_API_KEY;
-    const userAgent = process.env.USAJOBS_USER_AGENT || 'opportunity-intelligence@example.com';
-    
-    if (!apiKey) {
-      throw new AuthenticationFailureError('USAJOBS_API_KEY not configured', sourceId);
+    const userAgent = process.env.USAJOBS_USER_AGENT;
+    if (!apiKey || !userAgent) {
+      throw new AuthenticationFailureError('USAJOBS API key or User-Agent not configured', sourceId);
     }
-
-    return {
-      'Host': 'data.usajobs.gov',
-      'User-Agent': userAgent,
-      'Authorization-Key': apiKey
-    };
-  }
-
-  private buildUrl(sourceId: string, options: FetchOptions): string {
-    const params = new URLSearchParams();
-    params.set('Fields', 'Full');
-    if (options.limit) params.set('ResultsPerPage', String(Math.min(options.limit, 500)));
-    if (options.cursor) params.set('Page', options.cursor);
-    // Add since filter if publication date available
-    if (options.since) {
-      // USAJobs supports DatePosted filter
-      const daysAgo = Math.max(1, Math.floor((Date.now() - new Date(options.since).getTime()) / 86400000));
-      params.set('DatePosted', String(daysAgo));
-    }
-    return `${this.baseUrl}${this.endpointPath}?${params.toString()}`;
-  }
-
-  private extractItems(raw: unknown): any[] {
-    const data = raw as any;
-    return data?.SearchResult?.SearchResultItems ?? [];
+    const url = new URL(`${this.baseUrl}/api/search`);
+    url.searchParams.set('Keyword', 'test');
+    url.searchParams.set('ResultsPerPage', '1');
+    const resp = await fetch(url.toString(), {
+      headers: {
+        'Host': 'data.usajobs.gov',
+        'User-Agent': userAgent,
+        'Authorization-Key': apiKey,
+      },
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!resp.ok) throw new NetworkFailureError(`USAJOBS ping failed ${resp.status}`, sourceId);
   }
 }

@@ -1,11 +1,12 @@
+# Production uses Supabase; this compose is for optional local dev only.
 version: '3.8'
 
 services:
   postgres:
     image: pgvector/pgvector:pg16
-    container_name: opportunity_postgres
+    container_name: ois-postgres
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-opp_user}
+      POSTGRES_USER: ${POSTGRES_USER:-ois}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB:-opportunity_intelligence}
     ports:
@@ -13,10 +14,31 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-opp_user} -d ${POSTGRES_DB:-opportunity_intelligence}"]
-      interval: 5s
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ois}"]
+      interval: 10s
       timeout: 5s
       retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ois-backend
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${PORT:-3001}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-ois}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-opportunity_intelligence}
+      MODEL_PROVIDER_NVIDIA_API_KEY: ${MODEL_PROVIDER_NVIDIA_API_KEY}
+      MODEL_PROVIDER_NVIDIA_BASE_URL: ${MODEL_PROVIDER_NVIDIA_BASE_URL:-https://integrate.api.nvidia.com/v1}
+      WEBHOOK_HMAC_SECRET: ${WEBHOOK_HMAC_SECRET}
+      JWT_SECRET: ${JWT_SECRET}
+      API_KEY_HEADER: ${API_KEY_HEADER}
+    ports:
+      - "${PORT:-3001}:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   pgdata:

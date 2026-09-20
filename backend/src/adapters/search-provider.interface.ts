@@ -1,4 +1,4 @@
-import type { SourceRegistryEntry } from '../../../shared/src/registry/types';
+import type { SourceRegistryEntry } from 'shared/registry/types';
 import type {
   AdapterMetadata,
   HealthCheckResult,

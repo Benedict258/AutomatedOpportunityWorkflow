@@ -1,7 +1,7 @@
 import { BaseSourceAdapter } from '../../../adapters/base-adapter';
-import type { SourceRegistryEntry } from '../../../../shared/src/registry/types';
+import type { SourceRegistryEntry } from 'shared/registry/types';
 import type { FetchOptions, DiscoverOptions, NormalizedOpportunity } from '../../../adapters/types';
-import { SourceType, SourceCategory } from '../../../../shared/src/registry/types';
+import { SourceType, SourceCategory } from 'shared/registry/types';
 import { AuthenticationFailureError } from '../../../adapters/errors';
 
 const GREENHOUSE_FIXTURE = {
@@ -35,7 +35,7 @@ export class GreenhouseAdapter extends BaseSourceAdapter {
     return (
       source.source_type === SourceType.API &&
       (source.category === SourceCategory.EMPLOYMENT || source.category === SourceCategory.TECHNICAL) &&
-      (source.name.toLowerCase().includes('greenhouse') || source.organization?.toLowerCase().includes('greenhouse'))
+      (source.name.toLowerCase().includes('greenhouse') || (source.organization?.toLowerCase().includes('greenhouse') ?? false))
     );
   }
 

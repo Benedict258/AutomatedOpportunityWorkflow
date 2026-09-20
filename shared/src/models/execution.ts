@@ -52,7 +52,7 @@ export class ModelExecutionService {
   ): Promise<ModelExecutionResult<T>> {
     const config = this.registry.getConfigForOperation(operation);
     if (!config) {
-      return this.createFailure(operation, new Error(`No model configured for operation: ${operation}`), options);
+      return this.createFailure<T>(operation, new Error(`No model configured for operation: ${operation}`), options);
     }
 
     const executionId = generateExecutionId();
@@ -137,7 +137,7 @@ export class ModelExecutionService {
       }
     }
 
-    return this.createFailure(operation, lastError || new Error('Unknown error'), options, {
+    return this.createFailure<T>(operation, lastError || new Error('Unknown error'), options, {
       executionId,
       startedAt,
       retryCount,
@@ -271,7 +271,7 @@ export class ModelExecutionService {
     };
   }
 
-  private createFailure(
+  private createFailure<T>(
     operation: ModelOperation,
     error: Error,
     options: ModelExecutionOptions,

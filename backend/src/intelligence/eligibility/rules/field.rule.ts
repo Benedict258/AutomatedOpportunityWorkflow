@@ -12,7 +12,7 @@ export function fieldRule(candidate: EligibilityContext['candidate'], requiremen
     return makeDecision(reqId, reqDesc, candidateField, 'UNCERTAIN', 'Candidate field of study missing', undefined, 0);
   }
   
-  const match = requiredFields.some(rf => actualFields.some(af => af.toLowerCase().includes(String(rf).toLowerCase())));
+  const match = requiredFields.some((rf: any) => actualFields.some(af => af.toLowerCase().includes(String(rf).toLowerCase())));
   return makeDecision(
     reqId,
     reqDesc,

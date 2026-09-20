@@ -277,7 +277,15 @@ export async function discoveryRoutes(fastify: FastifyInstance): Promise<void> {
     },
   }, async (request, reply) => {
     const filters = request.query as z.infer<typeof listRunsQuerySchema>;
-    const { data, total } = await discoveryService.listRuns(filters);
-    return createListResponse(data, filters.page, filters.limit, total, '/api/v1/discovery/runs', request);
+    const data = await discoveryService.listRuns({
+      status: filters.status as any,
+      jobId: filters.jobId,
+      triggeredBy: filters.triggeredBy,
+      startedAfter: filters.startedAfter,
+      startedBefore: filters.startedBefore,
+      limit: filters.limit,
+      offset: (filters.page - 1) * filters.limit,
+    });
+    return createListResponse(data, filters.page, filters.limit, data.length, '/api/v1/discovery/runs', request);
   });
 }

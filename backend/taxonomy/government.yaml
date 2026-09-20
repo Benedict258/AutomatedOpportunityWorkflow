@@ -1,0 +1,280 @@
+nodes:
+  - id: government
+    name: GOVERNMENT
+    parent: null
+    active: true
+
+  - id: government.technology_digital
+    name: Technology & Digital Government
+    parent: government
+    active: true
+
+  - id: government.technology_digital.software
+    name: Software
+    parent: government.technology_digital
+    active: true
+
+  - id: government.technology_digital.it
+    name: IT
+    parent: government.technology_digital
+    active: true
+
+  - id: government.technology_digital.cloud
+    name: Cloud
+    parent: government.technology_digital
+    active: true
+
+  - id: government.technology_digital.ai
+    name: AI
+    parent: government.technology_digital
+    active: true
+
+  - id: government.technology_digital.data
+    name: Data
+    parent: government.technology_digital
+    active: true
+
+  - id: government.technology_digital.digital_transformation
+    name: Digital Transformation
+    parent: government.technology_digital
+    active: true
+
+  - id: government.cybersecurity
+    name: Cybersecurity
+    parent: government
+    active: true
+
+  - id: government.cybersecurity.security_operations
+    name: Security Operations
+    parent: government.cybersecurity
+    active: true
+
+  - id: government.cybersecurity.threat_intelligence
+    name: Threat Intelligence
+    parent: government.cybersecurity
+    active: true
+
+  - id: government.cybersecurity.risk
+    name: Risk
+    parent: government.cybersecurity
+    active: true
+
+  - id: government.cybersecurity.compliance
+    name: Compliance
+    parent: government.cybersecurity
+    active: true
+
+  - id: government.cybersecurity.digital_forensics
+    name: Digital Forensics
+    parent: government.cybersecurity
+    active: true
+
+  - id: government.cybersecurity.secure_software
+    name: Secure Software
+    parent: government.cybersecurity
+    active: true
+
+  - id: government.cybersecurity.cyber_policy
+    name: Cyber Policy
+    parent: government.cybersecurity
+    active: true
+
+  - id: government.intelligence_national_security
+    name: Intelligence & National Security
+    parent: government
+    active: true
+
+  - id: government.intelligence_national_security.intelligence_analysis
+    name: Intelligence Analysis
+    parent: government.intelligence_national_security
+    active: true
+
+  - id: government.intelligence_national_security.cyber_intelligence
+    name: Cyber Intelligence
+    parent: government.intelligence_national_security
+    active: true
+
+  - id: government.intelligence_national_security.technology_intelligence
+    name: Technology Intelligence
+    parent: government.intelligence_national_security
+    active: true
+
+  - id: government.intelligence_national_security.national_security
+    name: National Security
+    parent: government.intelligence_national_security
+    active: true
+
+  - id: government.intelligence_national_security.security_research
+    name: Security Research
+    parent: government.intelligence_national_security
+    active: true
+
+  - id: government.science_research
+    name: Science & Research
+    parent: government
+    active: true
+
+  - id: government.science_research.ai
+    name: AI
+    parent: government.science_research
+    active: true
+
+  - id: government.science_research.computer_science
+    name: Computer Science
+    parent: government.science_research
+    active: true
+
+  - id: government.science_research.engineering
+    name: Engineering
+    parent: government.science_research
+    active: true
+
+  - id: government.science_research.data_science
+    name: Data Science
+    parent: government.science_research
+    active: true
+
+  - id: government.science_research.applied_research
+    name: Applied Research
+    parent: government.science_research
+    active: true
+
+  - id: government.economic_financial
+    name: Economic & Financial
+    parent: government
+    active: true
+
+  - id: government.economic_financial.fintech
+    name: FinTech
+    parent: government.economic_financial
+    active: true
+
+  - id: government.economic_financial.economic_analysis
+    name: Economic Analysis
+    parent: government.economic_financial
+    active: true
+
+  - id: government.economic_financial.financial_technology
+    name: Financial Technology
+    parent: government.economic_financial
+    active: true
+
+  - id: government.economic_financial.data
+    name: Data
+    parent: government.economic_financial
+    active: true
+
+  - id: government.economic_financial.regulation
+    name: Regulation
+    parent: government.economic_financial
+    active: true
+
+  - id: government.technology_regulation
+    name: Technology Regulation
+    parent: government
+    active: true
+
+  - id: government.technology_regulation.ai_regulation
+    name: AI Regulation
+    parent: government.technology_regulation
+    active: true
+
+  - id: government.technology_regulation.privacy
+    name: Privacy
+    parent: government.technology_regulation
+    active: true
+
+  - id: government.technology_regulation.cyber_regulation
+    name: Cyber Regulation
+    parent: government.technology_regulation
+    active: true
+
+  - id: government.technology_regulation.telecommunications
+    name: Telecommunications
+    parent: government.technology_regulation
+    active: true
+
+  - id: government.technology_regulation.digital_markets
+    name: Digital Markets
+    parent: government.technology_regulation
+    active: true
+
+  - id: government.foreign_affairs
+    name: Foreign Affairs
+    parent: government
+    active: true
+
+  - id: government.foreign_affairs.diplomacy
+    name: Diplomacy
+    parent: government.foreign_affairs
+    active: true
+
+  - id: government.foreign_affairs.international_security
+    name: International Security
+    parent: government.foreign_affairs
+    active: true
+
+  - id: government.foreign_affairs.foreign_policy
+    name: Foreign Policy
+    parent: government.foreign_affairs
+    active: true
+
+  - id: government.foreign_affairs.technology_diplomacy
+    name: Technology Diplomacy
+    parent: government.foreign_affairs
+    active: true
+
+  - id: government.public_policy
+    name: Public Policy
+    parent: government
+    active: true
+
+  - id: government.public_policy.technology_policy
+    name: Technology Policy
+    parent: government.public_policy
+    active: true
+
+  - id: government.public_policy.cyber_policy
+    name: Cyber Policy
+    parent: government.public_policy
+    active: true
+
+  - id: government.public_policy.data_policy
+    name: Data Policy
+    parent: government.public_policy
+    active: true
+
+  - id: government.public_policy.digital_governance
+    name: Digital Governance
+    parent: government.public_policy
+    active: true
+
+  - id: government.public_services
+    name: Public Services
+    parent: government
+    active: true
+
+  - id: government.public_services.healthcare
+    name: Healthcare
+    parent: government.public_services
+    active: true
+
+  - id: government.public_services.education
+    name: Education
+    parent: government.public_services
+    active: true
+
+  - id: government.public_services.transportation
+    name: Transportation
+    parent: government.public_services
+    active: true
+
+  - id: government.public_services.environment
+    name: Environment
+    parent: government.public_services
+    active: true
+
+  - id: government.public_services.infrastructure
+    name: Infrastructure
+    parent: government.public_services
+    active: true

@@ -6,7 +6,7 @@
  * Never treats inferred as explicit - all classifications are evidence-based.
  */
 
-import { UnifiedModelService } from '../../../../shared/src/models/unified-service';
+import { UnifiedModelService } from 'shared/models/unified-service';
 import { DeterministicRequirementParser } from './deterministic-requirement-parser';
 import type { 
   Requirement, 
@@ -69,15 +69,7 @@ interface ModelExtractionResponse {
   warnings: string[];
 }
 
-interface ModelExecutionResult<T> {
-  status: 'success' | 'error' | 'validation_failed';
-  data?: T;
-  model?: string;
-  modelVersion?: string;
-  usage?: { promptTokens: number; completionTokens: number; totalTokens: number };
-  latencyMs: number;
-  error?: { message: string; category?: string };
-}
+
 
 /**
  * Real requirement extractor using unified model service with deterministic fallback
@@ -163,7 +155,7 @@ export class RealRequirementExtractor {
         );
         
         // Check if model extraction meets confidence threshold
-        if (modelResult.overallConfidence >= mergedOptions.confidenceThreshold) {
+        if ((modelResult.overallConfidence ?? 0) >= mergedOptions.confidenceThreshold) {
           this.recordSuccess(modelResult, startTime, 'model');
           return modelResult;
         }
@@ -171,7 +163,7 @@ export class RealRequirementExtractor {
         // Model confidence too low, try deterministic fallback
         if (mergedOptions.enableDeterministicFallback) {
           this.metrics.fallbackCount++;
-          const fallbackReason = `Model confidence ${modelResult.overallConfidence.toFixed(2)} below threshold ${mergedOptions.confidenceThreshold}`;
+          const fallbackReason = `Model confidence ${(modelResult.overallConfidence ?? 0).toFixed(2)} below threshold ${mergedOptions.confidenceThreshold}`;
           
           const detResult = await this.extractDeterministic(textContent, sourceId, opportunity);
           return this.mergeWithFallback(modelResult, detResult, fallbackReason, startTime);
@@ -248,14 +240,14 @@ export class RealRequirementExtractor {
       if (mergedOptions.enableModelExtraction && this.unifiedModelService.isInitialized()) {
         const modelResult = await this.extractWithModel(text, sourceId, null, mergedOptions);
         
-        if (modelResult.overallConfidence >= mergedOptions.confidenceThreshold) {
+        if ((modelResult.overallConfidence ?? 0) >= mergedOptions.confidenceThreshold) {
           this.recordSuccess(modelResult, startTime, 'model');
           return modelResult;
         }
 
         if (mergedOptions.enableDeterministicFallback) {
           this.metrics.fallbackCount++;
-          const fallbackReason = `Model confidence ${modelResult.overallConfidence.toFixed(2)} below threshold ${mergedOptions.confidenceThreshold}`;
+          const fallbackReason = `Model confidence ${(modelResult.overallConfidence ?? 0).toFixed(2)} below threshold ${mergedOptions.confidenceThreshold}`;
           const detResult = await this.extractDeterministic(text, sourceId, null);
           return this.mergeWithFallback(modelResult, detResult, fallbackReason, startTime);
         }
@@ -344,7 +336,7 @@ export class RealRequirementExtractor {
     const modelLatencyMs = Date.now() - modelStartTime;
     this.metrics.totalModelLatencyMs += modelLatencyMs;
 
-    if (executionResult.status !== 'success' || !executionResult.data) {
+    if (!executionResult.success || !executionResult.data) {
       throw new Error(`Model extraction failed: ${executionResult.error?.message || 'Unknown error'}`);
     }
 
@@ -357,7 +349,7 @@ export class RealRequirementExtractor {
     }
 
     // Convert to Requirement[] with provenance
-    const requirements: Requirement[] = response.requirements.map((r, index) => {
+    const requirements: Requirement[] = response.data.requirements.map((r: any, index: any) => {
       const requirement: Requirement = {
         id: `${sourceId}-${r.type}-${index}-${Date.now()}`,
         type: r.type,
@@ -373,8 +365,8 @@ export class RealRequirementExtractor {
         extractedAt: new Date().toISOString(),
         metadata: {
           modelExtraction: true,
-          modelId: executionResult.model,
-          modelVersion: executionResult.modelVersion,
+          modelId: executionResult.executionRecord.modelId,
+          modelVersion: executionResult.executionRecord.modelVersion,
           promptVersion: REQUIREMENT_PROMPT_VERSION,
           promptHash,
           traceId: options.traceId,
@@ -391,7 +383,7 @@ export class RealRequirementExtractor {
     });
 
     // Calculate overall confidence
-    const confidences = requirements.map(r => r.confidence);
+    const confidences = requirements.map(r => typeof r.confidence === 'number' ? r.confidence : 0.5);
     const overallConfidence = confidences.length > 0 
       ? confidences.reduce((a, b) => a + b, 0) / confidences.length 
       : 0;
@@ -399,17 +391,17 @@ export class RealRequirementExtractor {
     // Build provenance
     const provenance = {
       primaryExtractor: 'model' as const,
-      modelId: executionResult.model,
-      modelVersion: executionResult.modelVersion,
+      modelId: executionResult.executionRecord.modelId,
+      modelVersion: executionResult.executionRecord.modelVersion,
       promptVersion: REQUIREMENT_PROMPT_VERSION,
       promptHash,
       modelLatencyMs,
       totalLatencyMs: Date.now() - modelStartTime,
-      tokenUsage: executionResult.usage ? {
-        promptTokens: executionResult.usage.promptTokens,
-        completionTokens: executionResult.usage.completionTokens,
-        totalTokens: executionResult.usage.totalTokens,
-        estimatedCostUsd: this.estimateCost(executionResult.model || '', executionResult.usage)
+      tokenUsage: executionResult.executionRecord.tokenUsage ? {
+        promptTokens: executionResult.executionRecord.tokenUsage.promptTokens,
+        completionTokens: executionResult.executionRecord.tokenUsage.completionTokens,
+        totalTokens: executionResult.executionRecord.tokenUsage.totalTokens,
+        estimatedCostUsd: this.estimateCost(executionResult.executionRecord.modelId || '', executionResult.executionRecord.tokenUsage)
       } : undefined,
       fallbackChain: [] as any[],
       validationResults: validation.results.map(r => ({
@@ -425,7 +417,7 @@ export class RealRequirementExtractor {
 
     // Build warnings
     const warnings = [
-      ...response.warnings.map(w => ({
+      ...response.data.warnings.map((w: any) => ({
         code: 'MODEL_WARNING',
         message: w,
         severity: 'low' as const,
@@ -558,7 +550,7 @@ export class RealRequirementExtractor {
           }))
         });
       } else {
-        const modelConf = req.confidence;
+        const modelConf = typeof req.confidence === 'number' ? req.confidence : 0.5;
         const detConf = typeof existing.confidence === 'number' ? existing.confidence : 0.5;
         
         if (modelConf > detConf) {
@@ -582,8 +574,8 @@ export class RealRequirementExtractor {
 
     // Combine warnings
     const warnings = [
-      ...modelResult.warnings,
-      ...detResult.warnings,
+      ...(modelResult.warnings ?? []),
+      ...(detResult.warnings ?? []),
       {
         code: 'FALLBACK_USED',
         message: fallbackReason,
@@ -592,11 +584,11 @@ export class RealRequirementExtractor {
       }
     ];
 
-    const errors = [...modelResult.errors, ...detResult.errors];
+    const errors = [...(modelResult.errors ?? []), ...(detResult.errors ?? [])];
 
     // Calculate overall confidence (weighted toward deterministic since it was fallback)
     const modelConf = modelResult.requirements.length > 0
-      ? modelResult.requirements.reduce((a, b) => a + b.confidence, 0) / modelResult.requirements.length
+      ? modelResult.requirements.reduce((a, b) => a + (typeof b.confidence === 'number' ? b.confidence : 0.5), 0) / modelResult.requirements.length
       : 0;
     const detConf = detResult.requirements.length > 0
       ? detResult.requirements.reduce((a, b) => a + (typeof b.confidence === 'number' ? b.confidence : 0.5), 0) / detResult.requirements.length
@@ -772,8 +764,8 @@ export class RealRequirementExtractor {
       ? confidences.reduce((a, b) => a + b, 0) / confidences.length
       : 0;
 
-    this.metrics.warningsCount += result.warnings.length;
-    this.metrics.errorsCount += result.errors.length;
+    this.metrics.warningsCount += (result.warnings ?? []).length;
+    this.metrics.errorsCount += (result.errors ?? []).length;
 
     if (extractorType === 'model') {
       this.metrics.modelExtractions++;

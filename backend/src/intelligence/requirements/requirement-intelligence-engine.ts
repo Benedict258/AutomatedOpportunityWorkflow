@@ -36,8 +36,8 @@ export class RequirementIntelligenceEngine implements IRequirementExtractor {
     }
 
     for (const req of requirements) {
-      byType[req.type] = (byType[req.type] ?? 0) + 1;
-      byRelationship[req.relationship] = (byRelationship[req.relationship] ?? 0) + 1;
+      byType[req.type as RequirementType] = (byType[req.type as RequirementType] ?? 0) + 1;
+      byRelationship[req.relationship as RequirementRelationship] = (byRelationship[req.relationship as RequirementRelationship] ?? 0) + 1;
     }
 
     // Deduplicate by normalized value within same type

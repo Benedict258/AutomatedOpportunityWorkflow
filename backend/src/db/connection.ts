@@ -49,11 +49,11 @@ export async function checkDatabaseConnection(): Promise<boolean> {
   }
 }
 
-export async function executeQuery<T>(query: string, params?: unknown[]): Promise<pg.QueryResult<T>> {
+export async function executeQuery<T extends pg.QueryResultRow = any>(query: string, params?: unknown[]): Promise<pg.QueryResult<T>> {
   const pool = getPool();
   const client = await pool.connect();
   try {
-    return await client.query<T>(query, params);
+    return await client.query<T>(query, params as any[]);
   } finally {
     client.release();
   }

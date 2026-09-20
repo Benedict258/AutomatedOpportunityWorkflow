@@ -1,5 +1,5 @@
 import { getPool, executeQuery, executeTransaction } from '../db/connection';
-import { OpportunityPersister } from '../persistence/opportunity-persister';
+import { PgOpportunityRepository, OpportunityRow } from '../persistence/pg-opportunity-repository.js';
 import { VersionManager } from '../discovery/versioning/version-manager';
 import { TimingIntelligenceEngine } from '../intelligence/timing/timing-intelligence-engine';
 import { 
@@ -13,20 +13,20 @@ import {
 import { logger } from '../utils/logger.js';
 
 export class OpportunityService {
-  private persister: OpportunityPersister;
+  private repo: PgOpportunityRepository;
   private versionManager: VersionManager;
   private timingEngine: TimingIntelligenceEngine;
 
   constructor() {
-    this.persister = new OpportunityPersister();
+    this.repo = new PgOpportunityRepository();
     this.versionManager = new VersionManager();
     this.timingEngine = new TimingIntelligenceEngine();
   }
 
   async create(opportunity: CreateOpportunity): Promise<Opportunity> {
     logger.info({ title: opportunity.title }, 'Creating opportunity');
-    
-    // Convert to NormalizedOpportunity format for persister
+
+    // Assume opportunity.sourceId is internal source UUID
     const normalized = {
       title: opportunity.title,
       sourceId: opportunity.sourceId,
@@ -45,14 +45,8 @@ export class OpportunityService {
       lifecycleStage: opportunity.lifecycleStage,
     };
 
-    const result = await this.persister.persist([normalized]);
-    
-    if (result.inserted === 0 && result.updated === 0) {
-      throw new Error('Failed to create opportunity');
-    }
-
-    const created = result.opportunities[0];
-    return this.getById(created.id) as Promise<Opportunity>;
+    const row = await this.repo.upsert(normalized as any, opportunity.sourceId);
+    return this.getById(row.id) as Promise<Opportunity>;
   }
 
   async getById(id: string): Promise<Opportunity | null> {
@@ -154,7 +148,16 @@ export class OpportunityService {
     }
 
     // Create version before update
-    await this.versionManager.createVersion(existing, updates);
+    await this.versionManager.createVersion({
+      opportunityId: existing.id,
+      title: existing.title,
+      description: existing.description,
+      applicationDeadline: existing.applicationDeadline,
+      deadlineType: existing.deadlineType,
+      location: existing.location,
+      url: existing.url,
+      status: existing.status,
+    });
 
     // Build update query
     const setClause: string[] = [];
@@ -200,8 +203,8 @@ export class OpportunityService {
     return (result.rowCount ?? 0) > 0;
   }
 
-  async getVersions(opportunityId: string): Promise<OpportunityVersion[]> {
-    return this.versionManager.getLifecycle(opportunityId);
+  async getVersions(opportunityId: string): Promise<any[]> {
+    return this.versionManager.getVersions(opportunityId);
   }
 
   async getIntelligence(opportunityId: string): Promise<OpportunityIntelligence | null> {
@@ -243,7 +246,7 @@ export class OpportunityService {
       return null;
     }
 
-    return this.timingEngine.analyze(opportunity);
+    return this.timingEngine.assess(opportunity);
   }
 
   async reprocess(opportunityId: string): Promise<void> {

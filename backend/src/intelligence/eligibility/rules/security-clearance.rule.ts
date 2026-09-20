@@ -12,7 +12,7 @@ export function securityClearanceRule(candidate: EligibilityContext['candidate']
     return makeDecision(reqId, reqDesc, candidateField, 'UNCERTAIN', 'Security clearance unknown', undefined, 0);
   }
   
-  const eligible = !required || actual.toLowerCase() === String(required).toLowerCase();
+  const eligible = !required || actual!.toLowerCase() === String(required).toLowerCase();
   return makeDecision(
     reqId,
     reqDesc,

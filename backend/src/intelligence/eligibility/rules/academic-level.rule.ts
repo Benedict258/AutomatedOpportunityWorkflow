@@ -12,7 +12,7 @@ export function academicLevelRule(candidate: EligibilityContext['candidate'], re
     return makeDecision(reqId, reqDesc, candidateField, 'UNCERTAIN', 'Academic level missing', undefined, 0);
   }
   
-  const eligible = actual.toLowerCase() === String(required).toLowerCase();
+  const eligible = actual!.toLowerCase() === String(required).toLowerCase();
   return makeDecision(
     reqId,
     reqDesc,

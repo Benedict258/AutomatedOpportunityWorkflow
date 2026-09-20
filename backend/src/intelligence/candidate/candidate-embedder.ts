@@ -1,8 +1,8 @@
-import type { CandidateProfile } from '@shared/domain/candidate';
+import type { CandidateProfile } from 'shared/domain/candidate';
 import { RealEmbeddingService, UnifiedModelEmbedder, type EmbeddingGenerationOptions } from '../embeddings/real-embedding-service';
 import { Embedder } from '../embeddings/embedder.interface';
 import { EmbeddingModelInfo } from '../embeddings/types';
-import { unifiedModelService } from '@shared/models';
+import { unifiedModelService } from 'shared/models';
 
 /**
  * Candidate text representation for embedding generation
@@ -278,12 +278,12 @@ export class CandidateEmbeddingService {
 
     return this.service.generateForCandidate(candidateId, {
       skills: candidateProfile.skills,
-      experience: candidateProfile.experience?.map(e => ({
+      experience: candidateProfile.experience?.map((e: any) => ({
         title: e.role || e.title || '',
         organization: e.organization || '',
         description: e.description,
       })),
-      education: candidateProfile.education?.map(e => ({
+      education: candidateProfile.education?.map((e: any) => ({
         degree: e.degree || '',
         field: e.field || '',
       })),

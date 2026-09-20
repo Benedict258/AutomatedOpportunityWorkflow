@@ -1,4 +1,4 @@
-import type { SourceRegistryEntry } from '../../../shared/src/registry/types';
+import type { SourceRegistryEntry } from 'shared/registry/types';
 import type { SourceAdapter, AdapterFactory } from '../../adapters/source-adapter.interface';
 import type { FetchOptions } from '../../adapters/types';
 import { CollectionOptions, CollectionResult, CollectionMetrics, RawDocument } from './types';
@@ -113,7 +113,7 @@ export class CollectionOrchestrator {
         metrics.documentsCollected = documents.length;
 
         // Determine pagination continuation
-        const metadata = (collected[0]?.metadata ?? collected.metadata) as any;
+        const metadata = (Array.isArray(collected) ? collected[0]?.metadata : collected.metadata) as any;
         const paginationType = source.metadata?.pagination?.type;
 
         if (paginationType === 'cursor' || paginationType === 'page') {

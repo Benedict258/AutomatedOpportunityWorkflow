@@ -4,6 +4,12 @@ vi.mock('@/utils/logger.js', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
 
+vi.mock('@/persistence/pg-opportunity-repository.js', () => ({
+  PgOpportunityRepository: vi.fn().mockImplementation(() => ({
+    findByRunId: vi.fn().mockResolvedValue([]),
+  })),
+}));
+
 const mockJob = { id: 'job-123', status: 'CREATED', sourceIds: ['src-1'], category: 'TECH', createdAt: new Date().toISOString() };
 const mockRun = { id: 'run-123', status: 'SUCCEEDED', jobId: 'job-123', createdAt: new Date().toISOString() };
 

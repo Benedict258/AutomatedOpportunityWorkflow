@@ -1,6 +1,7 @@
 import { DiscoveryEngine } from '../discovery/discovery-engine';
 import { RunCoordinator } from '../discovery/run-management/run-coordinator';
-import { InMemoryRunPersistence } from '../discovery/run-management/run-persistence';
+import { PgRunRepository } from '../persistence/pg-run-repository.js';
+import { PgOpportunityRepository } from '../persistence/pg-opportunity-repository.js';
 import { PipelineOrchestrator } from '../discovery/pipeline-orchestrator';
 import { 
   CreateJobOptions, 
@@ -27,7 +28,7 @@ export class DiscoveryService {
     // Override the internal orchestrator
     (this.engine as any).orchestrator = this.orchestrator;
     
-    this.runCoordinator = new RunCoordinator(new InMemoryRunPersistence());
+    this.runCoordinator = new RunCoordinator(new PgRunRepository());
   }
 
   // Job management
@@ -95,9 +96,9 @@ export class DiscoveryService {
       return { run: null, opportunities: [] };
     }
 
-    // TODO: Link run to discovered opportunities via database
-    // For now, return empty array as opportunities are persisted separately
-    return { run, opportunities: [] };
+    const repo = new PgOpportunityRepository();
+    const rows = await repo.findByRunId(runId);
+    return { run, opportunities: rows };
   }
 }
 

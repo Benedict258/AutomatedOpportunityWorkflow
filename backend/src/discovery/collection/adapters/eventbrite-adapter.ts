@@ -1,7 +1,7 @@
 import { BaseSourceAdapter } from '../../../adapters/base-adapter';
-import type { SourceRegistryEntry } from '../../../../shared/src/registry/types';
+import type { SourceRegistryEntry } from 'shared/registry/types';
 import type { FetchOptions, DiscoverOptions, NormalizedOpportunity } from '../../../adapters/types';
-import { SourceType, SourceCategory } from '../../../../shared/src/registry/types';
+import { SourceType, SourceCategory } from 'shared/registry/types';
 import { AuthenticationFailureError } from '../../../adapters/errors';
 
 const EVENTBRITE_FIXTURE = {

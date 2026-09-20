@@ -9,8 +9,9 @@ export * from './real-candidate-intelligence';
 export {
   buildCandidateIntelligence as build,
   buildCandidateIntelligence,
-  deriveProfile,
 } from './candidate-intelligence-builder';
+
+export { deriveProfile } from './profile-derivation';
 
 export {
   RealCandidateIntelligenceEngine,

@@ -1,7 +1,7 @@
 import { CollectionOrchestrator } from './collection-orchestrator';
 import { createDefaultAdapterFactories } from './adapter-registry';
-import type { SourceRegistryEntry } from '../../../shared/src/registry/types';
-import { SourceCategory, SourceType, AccessMethod } from '../../../shared/src/registry/types';
+import type { SourceRegistryEntry } from 'shared/registry/types';
+import { SourceCategory, SourceType, AccessMethod } from 'shared/registry/types';
 
 const usaJobsSource: SourceRegistryEntry = {
   source_id: 'gov_usajobs_001',

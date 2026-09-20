@@ -12,7 +12,7 @@ export function certificationsRule(candidate: EligibilityContext['candidate'], r
     return makeDecision(reqId, reqDesc, candidateField, 'UNCERTAIN', 'Certifications missing', undefined, 0);
   }
   
-  const hasAll = requiredCerts.every(rc => actual.some(ac => ac.toLowerCase() === String(rc).toLowerCase()));
+  const hasAll = requiredCerts.every((rc: any) => actual.some(ac => ac.toLowerCase() === String(rc).toLowerCase()));
   return makeDecision(
     reqId,
     reqDesc,

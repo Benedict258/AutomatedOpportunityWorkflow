@@ -1,4 +1,4 @@
-import { UnifiedModelService } from '../../models/unified-service';
+import { UnifiedModelService } from 'shared/models/unified-service';
 import { createExtractionEngine } from '../extraction';
 import { createRealEngine as createRealClassificationEngine } from '../classification';
 import { RealRequirementExtractor } from '../requirements';
@@ -11,6 +11,7 @@ import { DeterministicScoringEngine } from '../scoring';
 import { RankingEngine } from '../ranking';
 import { ValueAssessmentEngine } from '../value';
 import { TimingIntelligenceEngine } from '../timing';
+import { PgEmbeddingRepository } from '../../persistence/pg-embedding-repository';
 
 export interface IntelligencePipelineInput {
   rawDocument: any;
@@ -47,23 +48,29 @@ export class IntelligencePipeline {
   private rankingEngine: RankingEngine;
   private valueEngine: ValueAssessmentEngine;
   private timingEngine: TimingIntelligenceEngine;
+  private embeddingRepo: PgEmbeddingRepository;
   private initialized = false;
 
   constructor(modelService: UnifiedModelService) {
     this.modelService = modelService;
     this.extractionEngine = createExtractionEngine(modelService);
-    this.classificationEngine = createRealClassificationEngine(modelService);
-    this.requirementExtractor = new RealRequirementExtractor(modelService);
-    this.candidateIntelligenceEngine = createRealCandidateIntelligenceEngine(modelService);
+    this.classificationEngine = createRealClassificationEngine();
+    this.requirementExtractor = new RealRequirementExtractor({ unifiedModelService: modelService });
     this.eligibilityEngine = new EligibilityEngine();
     this.scoringEngine = new DeterministicScoringEngine();
     this.rankingEngine = new RankingEngine();
     this.valueEngine = new ValueAssessmentEngine();
     this.timingEngine = new TimingIntelligenceEngine();
+    this.embeddingRepo = new PgEmbeddingRepository();
   }
 
   async initialize(): Promise<void> {
     if (this.initialized) return;
+
+    this.candidateIntelligenceEngine = await createRealCandidateIntelligenceEngine({
+      pool: { query: async () => ({ rows: [] }), end: async () => {} } as any,
+      unifiedModelService: this.modelService
+    });
 
     // Initialize embedding service with mock pool for now
     // In production, this would be a real pg pool
@@ -111,28 +118,36 @@ export class IntelligencePipeline {
       this.candidateIntelligenceEngine.embeddingService?.generateForCandidate(candidateId || 'temp', candidateIntelligence.derivedProfile)
     ]);
 
+    // Persist embeddings
+    if (opportunityEmbedding?.vector) {
+      await this.embeddingRepo.upsert('opportunity', opportunityId || 'temp', opportunityEmbedding.vector);
+    }
+    if (candidateEmbedding?.vector) {
+      await this.embeddingRepo.upsert('candidate', candidateId || 'temp', candidateEmbedding.vector);
+    }
+
     // 8. Semantic Matching
     const semanticMatch = await realMatchingEngine.computeMatch({
       id: candidateId || 'temp',
-      embedding: candidateEmbedding?.vector || [],
-      skills: candidateIntelligence.derivedProfile?.technicalSkills || [],
-      careerGoals: candidateIntelligence.derivedProfile?.careerGoals || [],
-      experience: candidateIntelligence.derivedProfile?.experience || [],
-      domains: candidateIntelligence.derivedProfile?.domains || []
+      skills: candidateIntelligence.derivedProfile?.technicalSkills?.map((s: any) => s.name) || [],
+      currentTitle: candidateIntelligence.derivedProfile?.careerGoals?.[0] || '',
+      technologies: candidateIntelligence.derivedProfile?.technologies || [],
+      domain: candidateIntelligence.derivedProfile?.domains?.[0] || '',
+      yearsOfExperience: candidateIntelligence.derivedProfile?.experience?.length || 0
     }, {
       id: opportunityId || 'temp',
-      embedding: opportunityEmbedding?.vector || [],
-      skills: requirements.requirements?.filter((r: any) => r.relationship === 'REQUIRED').map((r: any) => r.requirement) || [],
+      requiredSkills: requirements.requirements?.filter((r: any) => r.relationship === 'REQUIRED').map((r: any) => r.requirement) || [],
       domain: classification.primaryCategory,
-      experienceRequired: 5
+      title: normalizedOpportunity.title || '',
+      requiredExperienceYears: 5
     });
 
     // 9. Scoring
     const factorScores = {
-      careerAlignment: { rawScore: semanticMatch.factors.careerSimilarity, confidence: 0.8, evidence: [] },
-      skillAlignment: { rawScore: semanticMatch.factors.skillSimilarity, confidence: 0.8, evidence: [] },
+      careerAlignment: { rawScore: semanticMatch.careerSimilarity.score, confidence: semanticMatch.careerSimilarity.confidence, evidence: semanticMatch.careerSimilarity.evidence },
+      skillAlignment: { rawScore: semanticMatch.skillSimilarity.score, confidence: semanticMatch.skillSimilarity.confidence, evidence: semanticMatch.skillSimilarity.evidence },
       eligibility: { rawScore: eligibility.overall === 'ELIGIBLE' ? 1 : eligibility.overall === 'UNCERTAIN' ? 0.5 : 0, confidence: 0.9, evidence: [] },
-      experienceFit: { rawScore: semanticMatch.factors.experienceSimilarity, confidence: 0.7, evidence: [] },
+      experienceFit: { rawScore: semanticMatch.experienceSimilarity.score, confidence: semanticMatch.experienceSimilarity.confidence, evidence: semanticMatch.experienceSimilarity.evidence },
       educationFit: { rawScore: 0.5, confidence: 0.6, evidence: [] },
       opportunityValue: { rawScore: 0.7, confidence: 0.6, evidence: [] },
       locationRemoteFit: { rawScore: 0.8, confidence: 0.7, evidence: [] },
@@ -147,17 +162,14 @@ export class IntelligencePipeline {
     });
 
     // 10. Value Assessment
-    const value = this.valueEngine.assess({
-      careerRelevance: semanticMatch.factors.careerSimilarity,
-      experienceBuildingValue: semanticMatch.factors.experienceSimilarity,
-      skillDevelopment: semanticMatch.factors.skillSimilarity,
-      credentialValue: 0.5,
-      networkingPotential: 0.5,
-      organizationRelevance: 0.6,
-      compensation: 0.7,
-      accessibility: 0.8,
-      deadlineUrgency: 0.6,
-      effortApplicationComplexity: 0.5
+    const value = await this.valueEngine.assess({
+      id: opportunityId || 'temp',
+      title: normalizedOpportunity.title,
+      description: normalizedOpportunity.description,
+      skills: normalizedOpportunity.skills || [],
+      location: normalizedOpportunity.location,
+      remote: normalizedOpportunity.remoteStatus,
+      compensation: normalizedOpportunity.compensation || undefined
     }, candidateIntelligence.derivedProfile);
 
     // 11. Timing
@@ -172,17 +184,17 @@ export class IntelligencePipeline {
       candidate: candidateIntelligence.derivedProfile,
       eligibility: { status: eligibility.overall, decisions: eligibility.decisions },
       matchFactors: {
-        careerAlignment: semanticMatch.factors.careerSimilarity,
-        skillAlignment: semanticMatch.factors.skillSimilarity,
+        careerAlignment: semanticMatch.careerSimilarity.score,
+        skillAlignment: semanticMatch.skillSimilarity.score,
         eligibility: eligibility.overall === 'ELIGIBLE' ? 1 : eligibility.overall === 'UNCERTAIN' ? 0.5 : 0,
-        experienceFit: semanticMatch.factors.experienceSimilarity,
+        experienceFit: semanticMatch.experienceSimilarity.score,
         educationFit: 0.5,
-        opportunityValue: value.compositeScore,
+        opportunityValue: value.composite.valueScore,
         locationFit: 0.8,
         timing: 0.8
       },
       score: scoring.finalScore,
-      value: { compositeScore: value.compositeScore, factors: value.factors },
+      value: { compositeScore: value.composite.valueScore, factors: value.factors },
       timing: { actionability: timing.actionability, deadlineDistanceDays: timing.deadlineDistanceDays }
     });
 

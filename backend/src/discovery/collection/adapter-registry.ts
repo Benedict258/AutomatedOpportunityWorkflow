@@ -1,4 +1,4 @@
-import type { SourceRegistryEntry } from '../../../shared/src/registry/types';
+import type { SourceRegistryEntry } from 'shared/registry/types';
 import type { SourceAdapter, AdapterFactory } from '../../adapters/source-adapter.interface';
 import { USAJobsAdapter } from '../../adapters/usajobs-adapter';
 import { GreenhouseAdapter } from './adapters/greenhouse-adapter';

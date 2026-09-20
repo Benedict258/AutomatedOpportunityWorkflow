@@ -12,7 +12,7 @@ export function graduationTimingRule(candidate: EligibilityContext['candidate'],
     return makeDecision(reqId, reqDesc, candidateField, 'UNCERTAIN', 'Graduation date missing', undefined, 0);
   }
   
-  const gradDate = new Date(actual);
+  const gradDate = new Date(actual!);
   if (isNaN(gradDate.getTime())) {
     return makeDecision(reqId, reqDesc, candidateField, 'UNCERTAIN', 'Graduation date invalid', { candidate: actual }, 0);
   }

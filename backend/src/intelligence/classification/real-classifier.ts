@@ -1,7 +1,7 @@
 import { Classifier } from './classifier.interface';
 import { ClassificationResult, ClassificationContext, ClassifyOptions, ClassificationConfidenceLevel } from './types';
 import { DeterministicClassifier } from './deterministic-classifier';
-import { unifiedModelService } from '../../../shared/src/models/unified-service';
+import { unifiedModelService } from 'shared/models/unified-service';
 import { buildClassificationPrompt, PROMPT_VERSION, getPromptHash } from './prompt-v1';
 import { getTaxonomyMapper } from './taxonomy-mapper';
 import { NormalizedOpportunity } from '../../discovery/normalization/types';
@@ -138,10 +138,7 @@ export class RealClassifier implements Classifier {
       // Call model service with classification operation
       const executionResult = await unifiedModelService.classify(userPrompt, {
         operation: 'classification',
-        systemPrompt,
-        temperature: 0,
-        maxTokens: 1024,
-        responseFormat: 'json'
+        metadata: { systemPrompt, responseFormat: 'json', temperature: 0, maxTokens: 1024 }
       });
 
       if (!executionResult.success || !executionResult.data) {
@@ -175,8 +172,8 @@ export class RealClassifier implements Classifier {
           metadata: {
             promptVersion: PROMPT_VERSION,
             promptHash: getPromptHash(),
-            modelLatencyMs: executionResult.latencyMs,
-            tokenUsage: executionResult.tokenUsage
+            modelLatencyMs: executionResult.executionRecord.latencyMs,
+            tokenUsage: executionResult.executionRecord.tokenUsage
           }
         };
       });

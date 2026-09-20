@@ -74,8 +74,8 @@ export const titleOrgSimilarityRule: MatchingRule = {
   weight: 0.7,
   description: 'Combined title and organization fuzzy match',
   evaluate: (a, b) => {
-    const titleSim = similarityRatio(a.normalizedTitle, b.normalizedTitle);
-    const orgSim = similarityRatio(a.normalizedOrg, b.normalizedOrg);
+    const titleSim = similarityRatio(a.normalizedTitle ?? '', b.normalizedTitle ?? '');
+    const orgSim = similarityRatio(a.normalizedOrg ?? '', b.normalizedOrg ?? '');
     
     if (titleSim < 0.7) return 0;
     
@@ -93,8 +93,8 @@ export const contentFuzzyMatchRule: MatchingRule = {
     if (a.descriptionHash && b.descriptionHash && a.descriptionHash === b.descriptionHash) {
       return 1.0;
     }
-    const titleJaccard = jaccardSimilarity(a.normalizedTitle, b.normalizedTitle);
-    const orgJaccard = jaccardSimilarity(a.normalizedOrg, b.normalizedOrg);
+    const titleJaccard = jaccardSimilarity(a.normalizedTitle ?? '', b.normalizedTitle ?? '');
+    const orgJaccard = jaccardSimilarity(a.normalizedOrg ?? '', b.normalizedOrg ?? '');
     
     const score = titleJaccard * 0.6 + orgJaccard * 0.4;
     return score >= 0.8 ? score : 0;

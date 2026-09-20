@@ -1,7 +1,7 @@
 import { Normalizer } from './normalizer.interface';
 import { NormalizedOpportunity, NormalizationContext, NormalizationResult, NormalizationWarning, NormalizationError, RemoteStatus, OpportunityType } from './types';
 import { getMapper, FieldMapping } from './field-mappers';
-import { DeadlineType } from '../../../../../shared/src/enums';
+import { DeadlineType, OpportunityStatus } from 'shared/enums';
 
 export class NormalizationEngine implements Normalizer {
   private supportedSources: Set<string>;
@@ -121,18 +121,18 @@ export class NormalizationEngine implements Normalizer {
 
     const opportunity: NormalizedOpportunity = {
       source: context.sourceId,
-      externalId: mapped.externalId ?? context.externalId?.toString(),
+      externalId: (typeof mapped.externalId === 'string' ? mapped.externalId : context.externalId?.toString()),
       title: this.requireString(mapped.title, 'title', warnings, errors, 'Title is required'),
-      organization: this.coerceString(mapped.organization),
-      description: this.coerceString(mapped.description),
-      url: this.coerceString(mapped.url),
-      location: this.coerceString(mapped.location),
+      organization: this.coerceString(mapped.organization) as string | undefined,
+      description: this.coerceString(mapped.description) as string | undefined,
+      url: this.coerceString(mapped.url) as string | undefined,
+      location: this.coerceString(mapped.location) as string | undefined,
       remoteStatus: this.normalizeRemoteStatus(mapped.remoteStatus),
-      remoteInfo: mapped.remoteInfo ?? undefined,
+      remoteInfo: mapped.remoteInfo as Record<string, unknown> | undefined,
       opportunityType: this.normalizeOpportunityType(mapped.opportunityType),
-      category: this.normalizeCategory(mapped.category),
-      skills: this.normalizeSkills(mapped.skills),
-      eligibility: this.normalizeEligibility(mapped.eligibility),
+      category: this.normalizeCategory(mapped.category) as string[],
+      skills: this.normalizeSkills(mapped.skills) as any[],
+      eligibility: this.normalizeEligibility(mapped.eligibility) as any[],
       educationRequirements: this.normalizeStringArray(mapped.educationRequirements),
       experienceRequirements: this.normalizeStringArray(mapped.experienceRequirements),
       compensation: this.normalizeCompensation(mapped.compensation, mapped.salary_min, mapped.salary_max, mapped.salary_currency),
@@ -141,7 +141,7 @@ export class NormalizationEngine implements Normalizer {
       publicationDate: this.normalizeDate(mapped.publicationDate),
       deadline: this.normalizeDate(mapped.deadline),
       deadlineType: this.normalizeDeadlineType(mapped.deadlineType),
-      status: 'DISCOVERED',
+      status: 'DISCOVERED' as OpportunityStatus,
       firstSeenAt: now,
       lastSeenAt: now,
       provenance: {
@@ -181,7 +181,7 @@ export class NormalizationEngine implements Normalizer {
       remoteStatus: 'UNKNOWN',
       opportunityType: 'UNKNOWN',
       deadlineType: DeadlineType.UNKNOWN,
-      status: 'DISCOVERED',
+      status: 'DISCOVERED' as OpportunityStatus,
       firstSeenAt: new Date().toISOString(),
     };
   }

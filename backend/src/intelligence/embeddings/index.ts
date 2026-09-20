@@ -1,5 +1,5 @@
-export * from './types';
-export * from './embedder.interface';
+export type { EmbeddingModelInfo, EmbeddingMetadata, Embedding, EmbeddingWithText, EmbeddingStoreOptions, Embedder, EmbedderFactory } from './types';
+export type { Embedder as EmbedderInterface } from './embedder.interface';
 export * from './embedding-service';
 export * from './opportunity-embedder';
 export * from './candidate-embedder';

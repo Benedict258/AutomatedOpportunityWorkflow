@@ -1,4 +1,4 @@
-import type { SourceRegistryEntry } from '../../../shared/src/registry/types';
+import type { SourceRegistryEntry } from 'shared/registry/types';
 import type {
   FetchOptions,
   DiscoverOptions,
@@ -10,7 +10,7 @@ import type {
 
 export interface SourceAdapter {
   readonly adapterId: string;
-  readonly supports(source: SourceRegistryEntry): boolean;
+  supports(source: SourceRegistryEntry): boolean;
 
   discover(options: DiscoverOptions): Promise<string[]>;
   fetch(options: FetchOptions): Promise<unknown>;

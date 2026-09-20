@@ -6,7 +6,7 @@
  * falls back to deterministic extractor when model unavailable.
  */
 
-import { UnifiedModelService } from '../../../../shared/src/models/unified-service';
+import { UnifiedModelService } from 'shared/models/unified-service';
 import { DeterministicExtractor } from '../../discovery/extraction/deterministic-extractor';
 import type { RawDocument } from '../../discovery/extraction/types';
 import type {
@@ -82,7 +82,7 @@ export class ExtractionEngine {
       maxRetries: options.maxRetries ?? this.maxRetries,
       timeoutMs: options.timeoutMs ?? this.defaultTimeoutMs,
       promptVersion: options.promptVersion ?? this.defaultPromptVersion,
-      modelId: options.modelId,
+      modelId: options.modelId as string,
       traceId
     };
 
@@ -185,10 +185,10 @@ export class ExtractionEngine {
       },
       {
         operation: 'extraction',
-        modelId: options.modelId,
         timeoutMs: options.timeoutMs,
         maxRetries: options.maxRetries,
         metadata: {
+      modelId: options.modelId as string,
           documentId: document.documentId,
           sourceId: context.sourceId,
           promptVersion: options.promptVersion
@@ -199,7 +199,7 @@ export class ExtractionEngine {
     const modelLatencyMs = Date.now() - modelStartTime;
     this.metrics.totalModelLatencyMs += modelLatencyMs;
 
-    if (executionResult.status !== 'success' || !executionResult.data) {
+    if (!executionResult.success || !executionResult.data) {
       throw new Error(`Model extraction failed: ${executionResult.error?.message || 'Unknown error'}`);
     }
 
@@ -221,15 +221,15 @@ export class ExtractionEngine {
         confidence,
         provenance: {
           extractor: 'model',
-          modelId: executionResult.model,
-          modelVersion: executionResult.modelVersion,
+          modelId: executionResult.data!.model,
+          modelVersion: executionResult.executionRecord.modelVersion,
           promptVersion: options.promptVersion,
           promptHash,
           extractionLatencyMs: modelLatencyMs,
-          tokenUsage: executionResult.usage ? {
-            promptTokens: executionResult.usage.promptTokens,
-            completionTokens: executionResult.usage.completionTokens,
-            totalTokens: executionResult.usage.totalTokens
+          tokenUsage: executionResult.data!.usage ? {
+            promptTokens: executionResult.data!.usage!.promptTokens,
+            completionTokens: executionResult.data!.usage!.completionTokens,
+            totalTokens: executionResult.data!.usage!.totalTokens
           } : undefined,
           fallbackUsed: false
         },
@@ -244,16 +244,16 @@ export class ExtractionEngine {
     // Build provenance
     const provenance: ExtractionProvenance = {
       primaryExtractor: 'model',
-      modelId: executionResult.model,
-      modelVersion: executionResult.modelVersion,
+      modelId: executionResult.data!.model,
+      modelVersion: executionResult.executionRecord.modelVersion,
       promptVersion: options.promptVersion,
       modelLatencyMs,
       totalLatencyMs: Date.now() - modelStartTime,
-      tokenUsage: executionResult.usage ? {
-        promptTokens: executionResult.usage.promptTokens,
-        completionTokens: executionResult.usage.completionTokens,
-        totalTokens: executionResult.usage.totalTokens,
-        estimatedCostUsd: this.estimateCost(executionResult.model, executionResult.usage)
+      tokenUsage: executionResult.data!.usage ? {
+        promptTokens: executionResult.data!.usage!.promptTokens,
+        completionTokens: executionResult.data!.usage!.completionTokens,
+        totalTokens: executionResult.data!.usage!.totalTokens,
+        estimatedCostUsd: this.estimateCost(executionResult.data!.model, executionResult.data!.usage!)
       } : undefined,
       fallbackChain: [],
       validationResults: []
@@ -294,11 +294,11 @@ export class ExtractionEngine {
     const detStartTime = Date.now();
 
     // Check if deterministic extractor can handle this document
-    if (!this.deterministicExtractor.canHandle(document, context)) {
+    if (!this.deterministicExtractor.canHandle(document, context as any)) {
       throw new Error('Deterministic extractor cannot handle this content type');
     }
 
-    const detResult = await this.deterministicExtractor.extract(document, context);
+    const detResult = await this.deterministicExtractor.extract(document, context as any);
 
     // Convert to intelligence extraction format with provenance
     const fields: ExtractedFields = {};
@@ -332,10 +332,12 @@ export class ExtractionEngine {
       overallConfidence: detResult.confidence,
       warnings: detResult.warnings.map(w => ({
         ...w,
+        severity: w.severity || 'medium',
         extractor: 'deterministic'
       })),
       errors: detResult.errors.map(e => ({
         ...e,
+        recoverable: e.recoverable ?? true,
         extractor: 'deterministic'
       })),
       provenance,
@@ -356,6 +358,7 @@ export class ExtractionEngine {
     const mergedFields: ExtractedFields = { ...detResult.fields };
 
     for (const [fieldName, modelField] of Object.entries(modelResult.fields)) {
+      if (!modelField) continue;
       const detField = mergedFields[fieldName];
       // Use model field if it has higher confidence or deterministic doesn't have it
       if (!detField || (modelField.confidence > detField.confidence)) {
@@ -498,7 +501,7 @@ export class ExtractionEngine {
         }] : [])
       ],
       provenance: {
-        primaryExtractor: 'none',
+        primaryExtractor: 'none' as 'model' | 'deterministic' | 'hybrid',
         promptVersion: this.defaultPromptVersion,
         totalLatencyMs: Date.now() - startTime,
         fallbackChain: [],

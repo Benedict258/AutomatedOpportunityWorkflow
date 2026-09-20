@@ -61,6 +61,7 @@ export interface StructuredGenerationRequest<T = unknown> {
   schema: Record<string, unknown>;
   temperature?: number;
   maxTokens?: number;
+  promptVersion?: string;
   metadata?: Record<string, unknown>;
 }
 
@@ -141,7 +142,8 @@ export type ModelOperation =
   | 'semantic-matching'
   | 'reasoning'
   | 'reranking'
-  | 'candidate-intelligence';
+  | 'candidate-intelligence'
+  | 'matching';
 
 export type ModelErrorCategory =
   | 'timeout'
@@ -184,3 +186,5 @@ export interface ModelHealthCheck {
   error?: string;
   checkedAt: string;
 }
+
+export { ModelRegistry } from './registry';

@@ -1,5 +1,5 @@
-import type { SourceRegistryEntry, SourceCategory } from '../../shared/src/registry/types';
-import { HealthStatus } from '../../shared/src/registry/types';
+import type { SourceRegistryEntry, SourceCategory } from 'shared/registry/types';
+import { HealthStatus } from 'shared/registry/types';
 
 export interface SourceRegistryService {
   register(entry: Omit<SourceRegistryEntry, 'source_id' | 'last_checked'>): Promise<SourceRegistryEntry>;
@@ -18,7 +18,7 @@ export class InMemorySourceRegistryService implements SourceRegistryService {
   private store = new Map<string, SourceRegistryEntry>();
 
   async register(entry: Omit<SourceRegistryEntry, 'source_id' | 'last_checked'>): Promise<SourceRegistryEntry> {
-    const source_id = entry.source_id ?? crypto.randomUUID();
+    const source_id = (entry as any).source_id ?? crypto.randomUUID();
     const now = new Date().toISOString();
     const record: SourceRegistryEntry = {
       ...entry,

@@ -1,0 +1,130 @@
+nodes:
+  - id: technology
+    name: TECHNOLOGY
+    parent: null
+    active: true
+
+  - id: technology.software_engineering
+    name: Software Engineering
+    parent: technology
+    active: true
+
+  - id: technology.web_development
+    name: Web Development
+    parent: technology
+    active: true
+
+  - id: technology.backend
+    name: Backend
+    parent: technology
+    active: true
+
+  - id: technology.frontend
+    name: Frontend
+    parent: technology
+    active: true
+
+  - id: technology.apis
+    name: APIs
+    parent: technology
+    active: true
+
+  - id: technology.cloud
+    name: Cloud
+    parent: technology
+    active: true
+
+  - id: technology.devops
+    name: DevOps
+    parent: technology
+    active: true
+
+  - id: technology.data
+    name: Data
+    parent: technology
+    active: true
+
+  - id: technology.data_analytics
+    name: Data Analytics
+    parent: technology
+    active: true
+
+  - id: technology.data_engineering
+    name: Data Engineering
+    parent: technology
+    active: true
+
+  - id: technology.data_science
+    name: Data Science
+    parent: technology
+    active: true
+
+  - id: technology.ai
+    name: AI
+    parent: technology
+    active: true
+
+  - id: technology.machine_learning
+    name: Machine Learning
+    parent: technology
+    active: true
+
+  - id: technology.generative_ai
+    name: Generative AI
+    parent: technology
+    active: true
+
+  - id: technology.computer_vision
+    name: Computer Vision
+    parent: technology
+    active: true
+
+  - id: technology.cybersecurity
+    name: Cybersecurity
+    parent: technology
+    active: true
+
+  - id: technology.networking
+    name: Networking
+    parent: technology
+    active: true
+
+  - id: technology.linux
+    name: Linux
+    parent: technology
+    active: true
+
+  - id: technology.databases
+    name: Databases
+    parent: technology
+    active: true
+
+  - id: technology.infrastructure
+    name: Infrastructure
+    parent: technology
+    active: true
+
+  - id: technology.distributed_systems
+    name: Distributed Systems
+    parent: technology
+    active: true
+
+  - id: technology.blockchain_web3
+    name: Blockchain / Web3
+    parent: technology
+    active: true
+
+  - id: technology.embedded_systems
+    name: Embedded Systems
+    parent: technology
+    active: true
+
+  - id: technology.iot
+    name: IoT
+    parent: technology
+    active: true
+
+  - id: technology.systems_engineering
+    name: Systems Engineering
+    parent: technology
+    active: true

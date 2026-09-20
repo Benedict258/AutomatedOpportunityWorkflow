@@ -1,5 +1,5 @@
 import type { NormalizedOpportunity } from '../adapters/types';
-import { DeadlineType } from '../../../shared/src/enums';
+import { DeadlineType } from 'shared/enums';
 
 // Simplified persister for STEP 8 demonstration
 // In production, use Drizzle ORM with proper transactions

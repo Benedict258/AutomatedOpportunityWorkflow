@@ -1,7 +1,7 @@
-import { ModelRegistry } from './registry';
-import { ModelExecutionService, ModelExecutionOptions, ModelExecutionResult } from './execution';
-import { ModelObservability, generateExecutionId } from './observability';
-import { ModelCache, generateKey as cacheGenerateKey } from './cache';
+import { ModelRegistry } from './registry.js';
+import { ModelExecutionService, ModelExecutionOptions, ModelExecutionResult } from './execution.js';
+import { ModelObservability, generateExecutionId } from './observability.js';
+import { ModelCache, generateKey as cacheGenerateKey } from './cache.js';
 import {
   ModelOperation,
   GenerationRequest,
@@ -13,7 +13,7 @@ import {
   RerankRequest,
   RerankResponse,
   TokenUsage,
-} from './types';
+} from './types.js';
 
 export interface UnifiedModelServiceConfig {
   registry?: ModelRegistry;
@@ -48,14 +48,14 @@ export class UnifiedModelService {
 
     // Load configuration
     try {
-      const { modelConfig } = await import('../config');
+      const { modelConfig } = await import('../config/index.js');
       this.registry.loadConfig(modelConfig);
     } catch (e) {
       console.warn('Could not load model config from environment, using defaults');
     }
 
     // Register provider factory
-    const { OpenAICompatibleFactory } = await import('./providers/openai-compatible');
+    const { OpenAICompatibleFactory } = await import('./providers/openai-compatible.js');
     this.registry.registerFactory('openai-compatible', new OpenAICompatibleFactory());
     this.registry.registerFactory('ollama', new OpenAICompatibleFactory());
 
@@ -87,7 +87,7 @@ export class UnifiedModelService {
   ): Promise<ModelExecutionResult<StructuredGenerationResponse<T>>> {
     // Check cache first
     if (options.enableObservability !== false) {
-      const cacheKey = cacheGenerateKey(operation, options.metadata?.modelId || '', request.promptVersion || 'v1', '');
+      const cacheKey = cacheGenerateKey(operation, (options.metadata?.modelId as string) || '', request.promptVersion || 'v1', '');
       // Note: For structured generation, we'd need to hash the full request
     }
 
@@ -111,38 +111,38 @@ export class UnifiedModelService {
   }
 
   // Convenience methods for specific operations
-  async extract(opportunityText: string, options: ModelExecutionOptions = {}): Promise<ModelExecutionResult<GenerationResponse>> {
+  async extract(opportunityText: string, options: ModelExecutionOptions = { operation: 'extraction' }): Promise<ModelExecutionResult<GenerationResponse>> {
     return this.generate('extraction', {
       prompt: opportunityText,
       systemPrompt: 'You are an expert at extracting structured information from job postings and opportunity descriptions.',
       temperature: 0.1,
       maxTokens: 4096,
       responseFormat: 'json',
-    }, { operation: 'extraction', ...options });
+    }, { ...options, operation: 'extraction' });
   }
 
-  async classify(text: string, options: ModelExecutionOptions = {}): Promise<ModelExecutionResult<GenerationResponse>> {
+  async classify(text: string, options: ModelExecutionOptions = { operation: 'classification' }): Promise<ModelExecutionResult<GenerationResponse>> {
     return this.generate('classification', {
       prompt: text,
       systemPrompt: 'You are a taxonomy classifier for opportunities.',
       temperature: 0,
       maxTokens: 512,
       responseFormat: 'json',
-    }, { operation: 'classification', ...options });
+    }, { ...options, operation: 'classification' });
   }
 
-  async extractRequirements(text: string, options: ModelExecutionOptions = {}): Promise<ModelExecutionResult<GenerationResponse>> {
+  async extractRequirements(text: string, options: ModelExecutionOptions = { operation: 'requirement-extraction' }): Promise<ModelExecutionResult<GenerationResponse>> {
     return this.generate('requirement-extraction', {
       prompt: text,
       systemPrompt: 'You are an expert at extracting requirements from job postings.',
       temperature: 0.1,
       maxTokens: 4096,
       responseFormat: 'json',
-    }, { operation: 'requirement-extraction', ...options });
+    }, { ...options, operation: 'requirement-extraction' });
   }
 
-  async generateEmbeddings(texts: string[], options: ModelExecutionOptions = {}): Promise<ModelExecutionResult<EmbeddingResponse>> {
-    return this.embed('embedding', { texts }, options);
+  async generateEmbeddings(texts: string[], options: ModelExecutionOptions = { operation: 'embedding' }): Promise<ModelExecutionResult<EmbeddingResponse>> {
+    return this.embed('embedding', { texts }, { ...options, operation: 'embedding' });
   }
 
   async explain(
@@ -150,7 +150,7 @@ export class UnifiedModelService {
     candidate: any,
     matchFactors: any,
     score: number,
-    options: ModelExecutionOptions = {}
+    options: ModelExecutionOptions = { operation: 'reasoning' }
   ): Promise<ModelExecutionResult<GenerationResponse>> {
     return this.generate('reasoning', {
       prompt: this.buildExplanationPrompt(opportunity, candidate, matchFactors, score),
@@ -158,7 +158,7 @@ export class UnifiedModelService {
       temperature: 0.3,
       maxTokens: 2048,
       responseFormat: 'json',
-    }, { operation: 'reasoning', ...options });
+    }, { ...options, operation: 'reasoning' });
   }
 
   private buildExplanationPrompt(opportunity: any, candidate: any, matchFactors: any, score: number): string {

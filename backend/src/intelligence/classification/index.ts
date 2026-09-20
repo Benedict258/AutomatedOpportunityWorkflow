@@ -7,6 +7,9 @@ export { RealClassifier, createRealClassifier } from './real-classifier';
 export { buildClassificationPrompt, PROMPT_VERSION, getPromptHash, CLASSIFICATION_PROMPT_V1 } from './prompt-v1';
 export { TaxonomyMapper, getTaxonomyMapper, loadTaxonomyCategories } from './taxonomy-mapper';
 
+import { ClassificationEngine } from './classification-engine';
+import { createRealClassifier } from './real-classifier';
+
 export const createDefaultEngine = () => {
   return new ClassificationEngine();
 };

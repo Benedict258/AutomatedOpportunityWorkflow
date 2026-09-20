@@ -1,4 +1,4 @@
-import type { CandidateProfile, Experience as CanonicalExperience, Education as CanonicalEducation, Project as CanonicalProject } from '@shared/domain/candidate';
+import type { CandidateProfile, Experience as CanonicalExperience, Education as CanonicalEducation, Project as CanonicalProject } from 'shared/domain/candidate';
 
 /**
  * Derived intelligence types - separate from canonical CandidateProfile.
@@ -12,7 +12,7 @@ export interface Provenance {
     version?: string;
   };
   derivedAt: string; // ISO timestamp
-  derivedBy: 'candidate-intelligence-builder';
+  derivedBy: string;
   sources: string[]; // e.g., ['candidateProfile.education[0]', 'candidateProfile.skills']
   confidence?: number; // 0-1
 }

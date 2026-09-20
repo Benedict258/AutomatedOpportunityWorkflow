@@ -1,6 +1,6 @@
-import { ValidationContext, ValidationResult, ValidationIssue, ValidationSeverity } from './types';
+import { ValidationContext, ValidationResult, ValidationIssue, ValidationSeverity, ValidationRule } from './types';
 import { Validator } from './validator.interface';
-import { defaultValidationRules, ValidationRule } from './rule-engine';
+import { defaultValidationRules } from './rule-engine';
 
 export class ValidationEngine implements Validator {
   private rules: ValidationRule[];

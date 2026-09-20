@@ -78,10 +78,16 @@ export class RunCoordinator {
 
     // Simulate multi-source execution
     this.executeMultiSourceRun(runId, abortController.signal).catch(async (err) => {
-      await this.handleRunError(runId, err);
+      await this.persistence.updateRun(runId, {
+        status: RunStatus.FAILED,
+        error: err instanceof Error ? err.message : String(err),
+        completedAt: new Date().toISOString(),
+      });
     });
 
-    return this.persistence.getRun(runId)!;
+    const updated = await this.persistence.getRun(runId);
+    if (!updated) throw new Error(`Run ${runId} not found after start`);
+    return updated;
   }
 
   private async executeMultiSourceRun(runId: string, signal: AbortSignal): Promise<void> {
@@ -217,7 +223,7 @@ export class RunCoordinator {
       throw new Error(`Only RUNNING runs can be paused`);
     }
 
-    await this.persistence.updateRun(runId, {
+    const updated = await this.persistence.updateRun(runId, {
       status: RunStatus.PAUSED,
       pausedAt: new Date().toISOString(),
     });
@@ -225,7 +231,9 @@ export class RunCoordinator {
     const active = this.activeRuns.get(runId);
     if (active) active.abortController.abort();
 
-    return this.persistence.getRun(runId)!;
+    const record2 = await this.persistence.getRun(runId);
+    if (!record2) throw new Error(`Run ${runId} not found after pause`);
+    return record2;
   }
 
   async resumeRun(runId: string): Promise<DiscoveryRunRecord> {

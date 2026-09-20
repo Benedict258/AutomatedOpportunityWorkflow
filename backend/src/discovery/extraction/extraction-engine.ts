@@ -125,7 +125,7 @@ export class ExtractionEngine {
   }
 
   private async runWithTimeout<T>(promise: Promise<T>, ms: number): Promise<T | null> {
-    let timeout: NodeJS.Timeout;
+    let timeout!: NodeJS.Timeout;
     const timeoutPromise = new Promise<null>((resolve) => {
       timeout = setTimeout(() => resolve(null), ms);
     });

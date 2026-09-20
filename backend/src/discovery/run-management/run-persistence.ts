@@ -58,10 +58,10 @@ export class InMemoryRunPersistence implements RunPersistence {
         results = results.filter(r => r.triggeredBy === filter.triggeredBy);
       }
       if (filter.startedAfter) {
-        results = results.filter(r => r.startedAt && r.startedAt >= filter.startedAfter);
+        results = results.filter(r => r.startedAt && r.startedAt >= filter.startedAfter!);
       }
       if (filter.startedBefore) {
-        results = results.filter(r => r.startedAt && r.startedAt <= filter.startedBefore);
+        results = results.filter(r => r.startedAt && r.startedAt <= filter.startedBefore!);
       }
     }
 

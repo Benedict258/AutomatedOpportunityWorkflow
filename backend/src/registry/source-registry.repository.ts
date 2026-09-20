@@ -1,5 +1,5 @@
-import type { SourceRegistryEntry, SourceCategory } from '../../shared/src/registry/types';
-import { HealthStatus } from '../../shared/src/registry/types';
+import type { SourceRegistryEntry, SourceCategory, SourceType, AccessMethod } from 'shared/registry/types';
+import { HealthStatus } from 'shared/registry/types';
 
 /**
  * Maps SourceRegistryEntry to the existing `sources` table schema:
@@ -45,12 +45,12 @@ export function mapRowToEntry(row: SourceRow): SourceRegistryEntry {
     source_id: row.id,
     name: row.name,
     url: row.url ?? undefined,
-    source_type: (metadata.source_type as string) ?? row.source_type ?? 'API',
+    source_type: (metadata.source_type as SourceType) ?? row.source_type ?? ('API' as SourceType),
     sourceType: row.source_type ?? undefined,
     organization: metadata.organization as string | undefined,
     category: metadata.category as SourceCategory,
     geography: metadata.geography as string | undefined,
-    access_method: metadata.access_method as string,
+    access_method: metadata.access_method as AccessMethod,
     api_endpoint: metadata.api_endpoint as string | undefined,
     authentication: metadata.authentication as any,
     rate_limit: metadata.rate_limit as any,

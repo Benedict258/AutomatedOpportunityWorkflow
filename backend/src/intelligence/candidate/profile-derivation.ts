@@ -1,4 +1,4 @@
-import type { CandidateProfile } from '@shared/domain/candidate';
+import type { CandidateProfile } from 'shared/domain/candidate';
 import type { DerivedCandidateProfile, CandidateSkill, CandidateExperience, Provenance } from './types';
 
 export interface DeriveProfileOptions {
@@ -46,7 +46,7 @@ function deriveCareerGoals(profile: CandidateProfile): string[] {
   const goals = new Set<string>();
   
   // From canonical careerTargets
-  (profile.careerTargets ?? []).forEach(g => goals.add(g));
+  (profile.careerTargets ?? []).forEach((g: any) => goals.add(g));
   
   // From opportunity preferences
   if (profile.opportunityPreferences?.careerGoals) {
@@ -55,7 +55,7 @@ function deriveCareerGoals(profile: CandidateProfile): string[] {
   }
   
   // Infer from experience roles
-  (profile.experience ?? []).forEach(exp => {
+  (profile.experience ?? []).forEach((exp: any) => {
     if (exp.role) goals.add(`Advance in ${exp.role}`);
   });
   
@@ -67,7 +67,7 @@ function deriveTechnicalSkills(profile: CandidateProfile): CandidateSkill[] {
   const seen = new Set<string>();
   
   // From canonical skills list
-  (profile.skills ?? []).forEach(skillName => {
+  (profile.skills ?? []).forEach((skillName: any) => {
     const name = String(skillName).trim();
     if (!name || seen.has(name.toLowerCase())) return;
     seen.add(name.toLowerCase());
@@ -87,8 +87,8 @@ function deriveTechnicalSkills(profile: CandidateProfile): CandidateSkill[] {
   });
   
   // Infer from projects technologies
-  (profile.projects ?? []).forEach(proj => {
-    (proj.technologies ?? []).forEach(tech => {
+  (profile.projects ?? []).forEach((proj: any) => {
+    (proj.technologies ?? []).forEach((tech: any) => {
       const name = String(tech).trim();
       if (seen.has(name.toLowerCase())) return;
       seen.add(name.toLowerCase());
@@ -121,8 +121,8 @@ function deriveSoftSkills(profile: CandidateProfile): CandidateSkill[] {
   const seen = new Set<string>();
   
   const textSources = [
-    ...(profile.experience ?? []).map(e => e.description ?? ''),
-    ...(profile.projects ?? []).map(p => p.description ?? ''),
+    ...(profile.experience ?? []).map((e: any) => e.description ?? ''),
+    ...(profile.projects ?? []).map((p: any) => p.description ?? ''),
   ].join(' ').toLowerCase();
   
   for (const keyword of softSkillKeywords) {
@@ -149,12 +149,12 @@ function deriveSoftSkills(profile: CandidateProfile): CandidateSkill[] {
 function deriveTechnologies(profile: CandidateProfile): string[] {
   const techs = new Set<string>();
   
-  (profile.projects ?? []).forEach(p => {
-    (p.technologies ?? []).forEach(t => techs.add(String(t)));
+  (profile.projects ?? []).forEach((p: any) => {
+    (p.technologies ?? []).forEach((t: any) => techs.add(String(t)));
   });
   
   // Also extract from skills that look technical
-  (profile.skills ?? []).forEach(s => {
+  (profile.skills ?? []).forEach((s: any) => {
     const name = String(s);
     // Simple heuristic: if skill contains known tech patterns
     if (/js|ts|python|java|react|node|sql|aws|docker|kubernetes/i.test(name)) {
@@ -168,7 +168,7 @@ function deriveTechnologies(profile: CandidateProfile): string[] {
 function deriveDomains(profile: CandidateProfile): string[] {
   const domains = new Set<string>();
   
-  (profile.sectors ?? []).forEach(s => domains.add(String(s)));
+  (profile.sectors ?? []).forEach((s: any) => domains.add(String(s)));
   
   // Infer from government/policy interests
   if ((profile.governmentInterests ?? []).length) domains.add('Public Sector');
@@ -176,7 +176,7 @@ function deriveDomains(profile: CandidateProfile): string[] {
   if ((profile.internationalAffairsInterests ?? []).length) domains.add('International Affairs');
   
   // Infer from experience organizations
-  (profile.experience ?? []).forEach(exp => {
+  (profile.experience ?? []).forEach((exp: any) => {
     if (exp.organization) {
       // Placeholder: could map org to domain via taxonomy
       domains.add(exp.organization);
@@ -199,7 +199,7 @@ function deriveExperience(
   canonicalExperiences: CandidateProfile['experience'],
   provenance: Provenance
 ): CandidateExperience[] {
-  return (canonicalExperiences ?? []).map((exp, idx) => {
+  return (canonicalExperiences ?? []).map((exp: any, idx: any) => {
     const durationMonths = estimateDurationMonths(exp.startDate, exp.endDate);
     const skillsInferred = inferSkillsFromDescription(exp.description ?? '');
     const technologiesInferred = inferTechnologiesFromDescription(exp.description ?? '');
@@ -223,7 +223,7 @@ function deriveExperience(
 
 function deriveCertifications(profile: CandidateProfile): string[] {
   // Canonical certifications are EntityId array; map to readable names if needed
-  return (profile.certifications ?? []).map(id => String(id));
+  return (profile.certifications ?? []).map((id: any) => String(id));
 }
 
 function derivePreferredOpportunityTypes(profile: CandidateProfile): string[] {
@@ -251,7 +251,7 @@ function deriveProfessionalDevelopmentGoals(profile: CandidateProfile): string[]
   }
   
   // Infer from career targets
-  (profile.careerTargets ?? []).forEach(target => {
+  (profile.careerTargets ?? []).forEach((target: any) => {
     goals.push(`Develop skills for ${target}`);
   });
   

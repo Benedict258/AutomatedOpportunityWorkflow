@@ -1,5 +1,5 @@
-import { UnifiedModelService } from '../../models/unified-service';
-import { createIntelligencePipeline } from '../intelligence/pipeline';
+import { UnifiedModelService } from '../../models/unified-service.js';
+import { IntelligencePipeline as createIntelligencePipeline } from '../intelligence/pipeline.js';
 
 async function runIntegrationTest() {
   console.log('=== Phase 4 Integration Test ===\n');
@@ -7,7 +7,7 @@ async function runIntegrationTest() {
   const modelService = new UnifiedModelService();
   await modelService.initialize();
 
-  const pipeline = createIntelligencePipeline(modelService);
+  const pipeline = new createIntelligencePipeline(modelService);
   await pipeline.initialize();
 
   const testOpportunity = {
@@ -65,18 +65,18 @@ US Citizenship required`
 
   console.log('\n=== REQUIREMENTS ===');
   console.log(`Total: ${result.requirements.requirements?.length}`);
-  result.requirements.requirements?.forEach((r: any) => {
+  result.requirements.requirements.forEach((r) => {
     console.log(`  ${r.requirement}: ${r.type} (confidence: ${r.confidence})`);
   });
 
   console.log('\n=== ELIGIBILITY ===');
   console.log(`Status: ${result.eligibility.overall}`);
-  result.eligibility.decisions?.forEach((d: any) => {
+  result.eligibility.decisions.forEach((d) => {
     console.log(`  ${d.requirement}: ${d.state} - ${d.reason}`);
   });
 
   console.log('\n=== CANDIDATE INTELLIGENCE ===');
-  console.log(`Derived Skills: ${result.candidateIntelligence.derivedProfile?.technicalSkills?.map((s: any) => s.name).join(', ')}`);
+  console.log(`Derived Skills: ${result.candidateIntelligence.derivedProfile.technicalSkills.map((s) => s.name).join(', ')}`);
   console.log(`Career Goals: ${result.candidateIntelligence.derivedProfile?.careerGoals?.join(', ')}`);
 
   console.log('\n=== SEMANTIC MATCH ===');
@@ -88,7 +88,7 @@ US Citizenship required`
   console.log(`Final Score: ${result.scoring.finalScore.toFixed(3)}`);
   console.log(`Hard Eligibility: ${result.scoring.hardEligibility}`);
   console.log(`Weighted Match: ${result.scoring.weightedMatchScore.toFixed(3)}`);
-  result.scoring.factors?.forEach((f: any) => {
+  result.scoring.factors.forEach((f) => {
     console.log(`  ${f.name}: ${f.normalizedScore.toFixed(2)} (weight: ${f.weight})`);
   });
 

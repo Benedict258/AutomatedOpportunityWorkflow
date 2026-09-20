@@ -42,7 +42,7 @@ describe('Health Endpoints Integration', () => {
       expect(response.statusCode).toBe(200);
       const body = JSON.parse(response.body);
       expect(body.status).toBe('ready');
-      expect(body.checks.database).toBe('healthy');
+      expect(body.checks.database.status).toBe('healthy');
     });
 
     it('should return 503 when DB is not ready', async () => {
@@ -56,8 +56,8 @@ describe('Health Endpoints Integration', () => {
 
       expect(response.statusCode).toBe(503);
       const body = JSON.parse(response.body);
-      expect(body.status).toBe('not ready');
-      expect(body.checks.database).toBe('unhealthy');
+      expect(body.status).toBe('not_ready');
+      expect(body.checks.database.status).toBe('unhealthy');
     });
   });
 });

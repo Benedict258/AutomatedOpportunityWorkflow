@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import { checkDatabaseConnection } from '../db/connection.js';
+import { getPool } from '../db/connection.js';
 import { config } from '../config/index.js';
 import { logger } from '../utils/logger.js';
 
@@ -41,12 +41,13 @@ export async function healthRoutes(fastify: FastifyInstance): Promise<void> {
         200: {
           type: 'object',
           properties: {
-            status: { type: 'string', enum: ['ready', 'not_ready'] },
+            status: { type: 'string', enum: ['ready'] },
             timestamp: { type: 'string', format: 'date-time' },
             checks: {
               type: 'object',
               properties: {
-                database: { type: 'object', properties: { status: { type: 'string' }, latencyMs: { type: 'number' } } },
+                db: { type: 'boolean' },
+                vector: { type: 'boolean' },
               },
             },
           },
@@ -62,25 +63,35 @@ export async function healthRoutes(fastify: FastifyInstance): Promise<void> {
       },
     },
   }, async (request, reply) => {
-    const startTime = Date.now();
-    const dbHealthy = await checkDatabaseConnection();
-    const dbLatency = Date.now() - startTime;
+    let dbReady = false;
+    let vectorReady = false;
 
-    const checks = {
-      database: {
-        status: dbHealthy ? 'healthy' : 'unhealthy',
-        latencyMs: dbLatency,
-      },
-    };
+    try {
+      const pool = getPool();
+      await pool.query('SELECT 1');
+      dbReady = true;
+    } catch (error) {
+      logger.error({ err: error }, 'Database readiness check failed');
+    }
 
-    const allHealthy = dbHealthy;
+    // Vector check - placeholder for pgvector extension check
+    // In production, this could verify pgvector is available
+    vectorReady = dbReady;
 
-    if (!allHealthy) {
+    const checks = { db: dbReady, vector: vectorReady };
+    const allReady = dbReady && vectorReady;
+
+    if (!allReady) {
       reply.code(503);
+      return {
+        status: 'not_ready',
+        timestamp: new Date().toISOString(),
+        checks,
+      };
     }
 
     return {
-      status: allHealthy ? 'ready' : 'not_ready',
+      status: 'ready',
       timestamp: new Date().toISOString(),
       checks,
     };

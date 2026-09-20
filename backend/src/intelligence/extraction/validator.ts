@@ -10,7 +10,7 @@ import { EXTRACTION_JSON_SCHEMA } from './prompt-v1';
 /**
  * Expected field types for validation
  */
-const FIELD_TYPE_SCHEMA: Record<string, { type: string; required?: boolean; enum?: string[] }> = {
+const FIELD_TYPE_SCHEMA: Record<string, { type: string; required?: boolean; enum?: string[]; format?: string; minimum?: number; maximum?: number; pattern?: string; items?: { type: string } }> = {
   title: { type: 'string', required: true },
   organization: { type: 'string', required: true },
   description: { type: 'string' },

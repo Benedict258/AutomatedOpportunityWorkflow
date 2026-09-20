@@ -12,8 +12,8 @@ import {
   ModelHealthCheck,
   TokenUsage,
   ModelErrorCategory,
-} from './types';
-import { ModelProviderAdapter, ModelProviderFactory, RateLimiter, TokenBucketConfig } from './provider.interface';
+} from '../types.js';
+import { ModelProviderAdapter, ModelProviderFactory, RateLimiter, TokenBucketConfig } from '../provider.interface.js';
 
 function createTokenBucket(config: TokenBucketConfig): RateLimiter {
   let tokens = config.capacity;

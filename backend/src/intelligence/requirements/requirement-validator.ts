@@ -5,7 +5,8 @@
  * Ensures all requirements have valid relationship classification: REQUIRED/PREFERRED/OPTIONAL/INFERRED/UNKNOWN
  */
 
-import type { Requirement, RequirementType, RequirementRelationship, RequirementConfidence, RequirementExtractionResult } from './types';
+import { RequirementType, RequirementRelationship } from './types';
+import type { Requirement, RequirementConfidence, RequirementExtractionResult } from './types';
 import { REQUIREMENT_EXTRACTION_JSON_SCHEMA } from './prompt-v1';
 
 /**
@@ -42,27 +43,27 @@ export interface RequirementValidationReport {
  * Valid relationship types - used to verify no invalid relationships slip through
  */
 const VALID_RELATIONSHIPS: RequirementRelationship[] = [
-  'REQUIRED',
-  'PREFERRED', 
-  'OPTIONAL', 
-  'INFERRED', 
-  'UNKNOWN'
+  RequirementRelationship.REQUIRED,
+  RequirementRelationship.PREFERRED, 
+  RequirementRelationship.OPTIONAL, 
+  RequirementRelationship.INFERRED, 
+  RequirementRelationship.UNKNOWN
 ];
 
 /**
  * Valid requirement types
  */
 const VALID_TYPES: RequirementType[] = [
-  'SKILL',
-  'TECHNOLOGY', 
-  'CERTIFICATION',
-  'EDUCATION',
-  'EXPERIENCE',
-  'LOCATION',
-  'CITIZENSHIP',
-  'WORK_AUTHORIZATION',
-  'CLEARANCE',
-  'LANGUAGE'
+  RequirementType.SKILL,
+  RequirementType.TECHNOLOGY, 
+  RequirementType.CERTIFICATION,
+  RequirementType.EDUCATION,
+  RequirementType.EXPERIENCE,
+  RequirementType.LOCATION,
+  RequirementType.CITIZENSHIP,
+  RequirementType.WORK_AUTHORIZATION,
+  RequirementType.CLEARANCE,
+  RequirementType.LANGUAGE
 ];
 
 /**
@@ -175,7 +176,7 @@ export function validateRequirementExtraction(
     if (req.relationship === 'INFERRED') {
       inferredCount++;
       // Verify it's not being treated as explicit
-      if (req.confidence > 0.8) {
+      if (typeof req.confidence === 'number' && req.confidence > 0.8) {
         reqWarnings.push('High confidence on INFERRED requirement - verify this is not explicit');
       }
     } else if (req.relationship !== 'UNKNOWN') {
@@ -291,8 +292,8 @@ export function applyRequirementValidationToResult(
   result: RequirementExtractionResult,
   validation: RequirementValidationReport
 ): RequirementExtractionResult {
-  const newWarnings = [...result.warnings];
-  const newErrors = [...result.errors];
+  const newWarnings = [...(result.warnings ?? [])];
+  const newErrors = [...(result.errors ?? [])];
   
   // Add field validation warnings
   for (const reqResult of validation.results) {
@@ -420,11 +421,12 @@ export function isInferredRelationship(relationship: RequirementRelationship): b
  */
 export function getRelationshipStrength(relationship: RequirementRelationship): number {
   switch (relationship) {
-    case 'REQUIRED': return 4;
-    case 'PREFERRED': return 3;
-    case 'OPTIONAL': return 2;
-    case 'INFERRED': return 1;
-    case 'UNKNOWN': return 0;
+    case RequirementRelationship.REQUIRED: return 4;
+    case RequirementRelationship.PREFERRED: return 3;
+    case RequirementRelationship.OPTIONAL: return 2;
+    case RequirementRelationship.INFERRED: return 1;
+    case RequirementRelationship.UNKNOWN: return 0;
+    default: return 0;
   }
 }
 

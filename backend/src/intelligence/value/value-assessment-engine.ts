@@ -83,7 +83,7 @@ export class ValueAssessmentEngine {
 
     const factors: ValueFactors = {
       careerRelevance: this.assessCareerRelevance(opportunity, candidate),
-      experienceBuildingValue: this.assessExperienceBuilding(opportunity, candidate),
+      experienceBuildingValue: this.assessExperienceBuilding(opportunity),
       skillDevelopment: this.assessSkillDevelopment(opportunity, candidate),
       credentialValue: this.assessCredentialValue(opportunity),
       networkingPotential: this.assessNetworkingPotential(opportunity),

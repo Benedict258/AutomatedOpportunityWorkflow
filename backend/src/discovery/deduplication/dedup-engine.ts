@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import { DuplicateCandidate, DuplicateGroup, DeduplicationResult, CandidatePair } from './types';
-import { MatchingRule, getMatchingRules } from './matching-rules';
+import { MatchingRule } from './types';
+import { getMatchingRules } from './matching-rules';
 
 export interface DedupEngineOptions {
   rules?: MatchingRule[];

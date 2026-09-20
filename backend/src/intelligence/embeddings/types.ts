@@ -34,4 +34,10 @@ export interface EmbeddingStoreOptions {
   usePgVector?: boolean;
 }
 
+export interface Embedder {
+  embed(text: string): Promise<number[]>;
+  embedBatch(texts: string[]): Promise<number[][]>;
+  validateVector(vector: number[]): boolean;
+}
+
 export type EmbedderFactory = (model: string) => Promise<Embedder> | Embedder;

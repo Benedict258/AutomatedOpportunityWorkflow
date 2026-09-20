@@ -153,7 +153,7 @@ export class CircuitBreakerRegistry {
       this.breakers.set(sourceId, new CircuitBreaker(sourceId, {
         ...CircuitBreaker.defaultConfig(),
         ...config,
-      }));
+      } as Required<CircuitBreakerConfig>));
     }
     return this.breakers.get(sourceId)!;
   }

@@ -12,8 +12,8 @@ export function workAuthorizationRule(candidate: EligibilityContext['candidate']
     return makeDecision(reqId, reqDesc, candidateField, 'UNCERTAIN', 'Work authorization missing', undefined, 0);
   }
   
-  const countryMatch = !requiredCountry || wa.country.toLowerCase() === String(requiredCountry).toLowerCase();
-  const valid = ['citizen', 'permanent_resident', 'work_visa'].includes(wa.type.toLowerCase());
+  const countryMatch = !requiredCountry || wa!.country!.toLowerCase() === String(requiredCountry).toLowerCase();
+  const valid = ['citizen', 'permanent_resident', 'work_visa'].includes(wa!.type!.toLowerCase());
   
   const eligible = countryMatch && valid;
   return makeDecision(
@@ -21,7 +21,7 @@ export function workAuthorizationRule(candidate: EligibilityContext['candidate']
     reqDesc,
     candidateField,
     eligible ? 'ELIGIBLE' : 'INELIGIBLE',
-    eligible ? 'Work authorization valid' : `Work authorization ${wa.type} in ${wa.country} insufficient`,
+    eligible ? 'Work authorization valid' : `Work authorization ${wa!.type} in ${wa!.country} insufficient`,
     { candidate: wa, requiredCountry },
     1
   );

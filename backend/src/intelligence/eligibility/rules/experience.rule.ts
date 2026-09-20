@@ -14,8 +14,8 @@ export function experienceRule(candidate: EligibilityContext['candidate'], requi
   }
   
   let eligible = false;
-  if (operator === 'gte') eligible = actual >= requiredYears;
-  else if (operator === 'lte') eligible = actual <= requiredYears;
+  if (operator === 'gte') eligible = actual! >= requiredYears;
+  else if (operator === 'lte') eligible = actual! <= requiredYears;
   
   return makeDecision(
     reqId,

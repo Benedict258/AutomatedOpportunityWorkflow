@@ -90,8 +90,8 @@ export class MatchService {
     return result.rows[0] || null;
   }
 
-  async getForCandidate(candidateId: string, filters: MatchFilters = {}): Promise<{ data: Match[]; total: number }> {
-    return this.list({ ...filters, candidateId });
+  async getForCandidate(candidateId: string, filters: MatchFilters = {} as MatchFilters): Promise<{ data: Match[]; total: number }> {
+    return this.list({ ...filters, candidateId } as MatchFilters);
   }
 }
 

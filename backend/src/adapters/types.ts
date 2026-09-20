@@ -1,5 +1,5 @@
-import type { Opportunity } from '../../../shared/src/domain/opportunity';
-import type { SourceRegistryEntry } from '../../../shared/src/registry/types';
+import type { Opportunity } from 'shared/domain/opportunity';
+import type { SourceRegistryEntry } from 'shared/registry/types';
 
 export interface FetchOptions {
   sourceId: string;

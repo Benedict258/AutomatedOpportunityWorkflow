@@ -16,14 +16,14 @@ export async function rateLimitPlugin(fastify: FastifyInstance): Promise<void> {
       }
       return request.ip;
     },
-    errorResponseBuilder: (opts: { max: number; timeWindow: number }, request: FastifyRequest) => ({
+    errorResponseBuilder: (request: FastifyRequest, context: any) => ({
       error: {
         code: 'RATE_LIMITED',
         title: 'Rate Limited',
-        message: `Rate limit exceeded. Max ${opts.max} requests per ${opts.timeWindow / 1000}s.`,
+        message: `Rate limit exceeded. Max ${context.max} requests per ${context.timeWindow / 1000}s.`,
         status: 429,
         requestId: (request as any).requestId,
-        retryAfter: Math.ceil(opts.timeWindow / 1000),
+        retryAfter: Math.ceil(context.timeWindow / 1000),
       },
     }),
     addHeaders: {

@@ -61,7 +61,7 @@ function inlineDefinitions(schema: FastifyJsonSchema): FastifyJsonSchema {
 
     // Recurse into properties
     const result: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(obj)) {
+    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
       if (key !== '#/' && key !== '$ref' && key !== '#') {
         result[key] = resolve(value);
       }
@@ -69,7 +69,7 @@ function inlineDefinitions(schema: FastifyJsonSchema): FastifyJsonSchema {
     return result;
   }
 
-  const result = resolve(schema);
+  const result = resolve(schema) as Record<string, unknown>;
   // Remove the definitions sections
   delete result['#/components/schemas'];
   delete result['#/definitions'];
@@ -79,9 +79,6 @@ function inlineDefinitions(schema: FastifyJsonSchema): FastifyJsonSchema {
 export function zodToJson(schema: ZodSchema): FastifyJsonSchema {
   const jsonSchema = zodToJsonSchema(schema, {
     target: 'jsonSchema7',
-    errorReportingPath: 'additionalProperties',
-    standalone: false,
-    definitions: true,
     definitionPath: '#/components/schemas',
   }) as FastifyJsonSchema;
 

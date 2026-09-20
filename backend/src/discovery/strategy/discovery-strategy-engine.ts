@@ -67,7 +67,7 @@ export class DiscoveryStrategyEngine {
       generatedAt: new Date().toISOString(),
       items,
       metadata: {
-        families: families.map(f => f.id),
+        families: families.map(f => f!.id),
         sourceFilter: params.sourceIds,
       },
     };

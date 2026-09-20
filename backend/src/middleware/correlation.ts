@@ -72,6 +72,5 @@ declare module 'fastify' {
     correlationId: string;
     requestId: string;
     startTime: number;
-    log: FastifyBaseLogger;
   }
 }
