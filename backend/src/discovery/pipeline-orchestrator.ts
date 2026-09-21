@@ -5,6 +5,8 @@ import {
   StageResult,
   SourceStageResult,
 } from './types';
+import { PgOpportunityRepository } from '../persistence/pg-opportunity-repository';
+import { getPool } from '../db/connection';
 
 export class PipelineOrchestrator {
   private stages: Array<{
@@ -116,8 +118,9 @@ export class PipelineOrchestrator {
   private async executeSourcesStage(context: DiscoveryExecutionContext): Promise<StageResult> {
     const sourceResults: Record<string, SourceStageResult> = {};
 
-    const registry = context.sourceRegistryService as { getById?: (id: string) => Promise<{ source_id: string; name: string } | null> } | undefined;
+    const registry = context.sourceRegistryService as { getById?: (id: string) => Promise<any | null> } | undefined;
     const factories = context.adapterFactory as Array<{ canHandle: (s: any) => boolean; create: (s: any) => any }> | undefined;
+    const persister = new PgOpportunityRepository();
 
     for (const sourceId of context.sources) {
       const startedAt = new Date().toISOString();
@@ -136,14 +139,30 @@ export class PipelineOrchestrator {
 
         const adapter = factory.create(sourceEntry);
         const raw = await adapter.fetch({ sourceId, raw: true, limit: 20 });
-        const collected = Array.isArray(raw) ? raw.length : (raw ? 1 : 0);
+
+        // Normalize raw data into structured opportunities
+        const normalized = await adapter.normalize(raw, sourceId);
+
+        // Ensure source exists in sources table (foreign key constraint)
+        await this.ensureSourceExists(sourceEntry);
+
+        // Persist each normalized opportunity with run_id
+        let persisted = 0;
+        for (const opp of normalized) {
+          try {
+            await persister.upsert(opp, sourceEntry.source_id, undefined, context.runId);
+            persisted++;
+          } catch (err) {
+            // Log but don't fail the whole source for one bad record
+          }
+        }
 
         sourceResults[sourceId] = {
           sourceId,
           status: 'SUCCEEDED',
           startedAt,
           completedAt: new Date().toISOString(),
-          itemsDiscovered: collected,
+          itemsDiscovered: normalized.length,
         };
       } catch (err) {
         sourceResults[sourceId] = {
@@ -163,6 +182,21 @@ export class PipelineOrchestrator {
       metadata: { executedCount: context.sources.length },
       sourceResults,
     };
+  }
+
+  private async ensureSourceExists(sourceEntry: { source_id: string; name: string; url?: string; source_type?: string; category?: string }): Promise<void> {
+    const query = `
+      INSERT INTO sources (id, name, url, source_type, metadata)
+      VALUES ($1, $2, $3, $4, $5)
+      ON CONFLICT (id) DO NOTHING
+    `;
+    await getPool().query(query, [
+      sourceEntry.source_id,
+      sourceEntry.name,
+      sourceEntry.url ?? null,
+      sourceEntry.source_type ?? null,
+      JSON.stringify({ category: sourceEntry.category }),
+    ]);
   }
 
   private async aggregateStage(context: DiscoveryExecutionContext): Promise<StageResult> {
