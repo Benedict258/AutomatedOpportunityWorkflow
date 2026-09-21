@@ -21,6 +21,8 @@ services:
         sync: false
       - key: USAJOBS_USER_AGENT
         sync: false
+      - key: MODEL_PROVIDER_NVIDIA_TYPE
+        value: openai-compatible
       - key: MODEL_PROVIDER_NVIDIA_API_KEY
         sync: false
       - key: MODEL_PROVIDER_NVIDIA_BASE_URL
