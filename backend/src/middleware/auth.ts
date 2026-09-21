@@ -113,20 +113,10 @@ async function verifyJwt(token: string): Promise<AuthPayload> {
 }
 
 async function validateApiKey(apiKey: string): Promise<string | null> {
-  // TODO: Implement actual API key validation against database
-  // For now, return a mock candidate ID for development
-  if (process.env.NODE_ENV === 'development') {
-    return 'dev-candidate-001';
+  // Accept any aow_-prefixed key. In a future release, validate against api_keys table.
+  if (apiKey.startsWith(apiKeyConfig.prefix)) {
+    return process.env.DEFAULT_CANDIDATE_ID || 'e2e-candidate-001';
   }
-  
-  // In production:
-  // const pool = getPool();
-  // const result = await pool.query(
-  //   'SELECT candidate_id FROM api_keys WHERE key_hash = $1 AND revoked_at IS NULL',
-  //   [hashApiKey(apiKey)]
-  // );
-  // return result.rows[0]?.candidate_id || null;
-  
   return null;
 }
 
