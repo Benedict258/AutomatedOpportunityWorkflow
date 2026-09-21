@@ -3,7 +3,7 @@ import path from 'path';
 import { getPool, executeQuery } from './connection.js';
 import { logger } from '../utils/logger.js';
 
-const MIGRATIONS_DIR = path.resolve(__dirname ?? process.cwd(), '../../migrations');
+const MIGRATIONS_DIR = path.resolve(process.cwd(), 'backend', 'migrations');
 const MIGRATION_TABLE = 'schema_migrations';
 
 export async function ensureMigrationTable(): Promise<void> {
@@ -26,8 +26,10 @@ export async function getAppliedMigrations(): Promise<string[]> {
 export async function getPendingMigrations(): Promise<string[]> {
   const applied = await getAppliedMigrations();
   
+  logger.info({ dir: MIGRATIONS_DIR }, 'Looking for migration files');
+
   if (!fs.existsSync(MIGRATIONS_DIR)) {
-    logger.warn({ dir: MIGRATIONS_DIR }, 'Migrations directory not found');
+    logger.error({ dir: MIGRATIONS_DIR }, 'Migrations directory not found — no migrations will be applied');
     return [];
   }
 
@@ -35,6 +37,8 @@ export async function getPendingMigrations(): Promise<string[]> {
     .readdirSync(MIGRATIONS_DIR)
     .filter((f) => f.endsWith('.sql'))
     .sort();
+
+  logger.info({ total: files.length, applied: applied.length, pending: files.length - applied.length }, 'Migration scan complete');
 
   return files.filter((f) => !applied.includes(f));
 }
