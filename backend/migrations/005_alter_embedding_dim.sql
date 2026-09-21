@@ -1,5 +1,6 @@
 -- Migration 005: Alter embedding dimension from 1536 to 2048
 -- Aligns schema with NVIDIA Nemotron-3-Embed-1B (2048 dimensions)
+-- Uses HNSW indexes (IVFFlat max is 2000 dimensions)
 
 -- Drop the view that depends on the embedding column
 DROP VIEW IF EXISTS embedding_search;
@@ -18,18 +19,18 @@ ALTER TABLE skills ALTER COLUMN embedding TYPE VECTOR(2048) USING embedding::vec
 -- Alter embeddings table column
 ALTER TABLE embeddings ALTER COLUMN embedding TYPE VECTOR(2048) USING embedding::vector(2048);
 
--- Recreate IVFFlat indexes with new dimension
+-- Recreate indexes using HNSW (supports >2000 dimensions, unlike IVFFlat)
 CREATE INDEX idx_opportunities_embedding
-    ON opportunities USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
+    ON opportunities USING hnsw (embedding vector_cosine_ops);
 
 CREATE INDEX idx_candidate_profiles_embedding
-    ON candidate_profiles USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
+    ON candidate_profiles USING hnsw (embedding vector_cosine_ops);
 
 CREATE INDEX idx_skills_embedding
-    ON skills USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
+    ON skills USING hnsw (embedding vector_cosine_ops);
 
-CREATE INDEX idx_embeddings_vector_ivfflat
-    ON embeddings USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
+CREATE INDEX idx_embeddings_vector_hnsw
+    ON embeddings USING hnsw (embedding vector_cosine_ops);
 
 -- Recreate the view with updated column references
 CREATE OR REPLACE VIEW embedding_search AS
