@@ -3,7 +3,7 @@ import path from 'path';
 import { getPool, executeQuery } from './connection.js';
 import { logger } from '../utils/logger.js';
 
-const MIGRATIONS_DIR = path.resolve(process.cwd(), 'backend', 'migrations');
+const MIGRATIONS_DIR = path.resolve(__dirname, '../../../../migrations');
 const MIGRATION_TABLE = 'schema_migrations';
 
 export async function ensureMigrationTable(): Promise<void> {
