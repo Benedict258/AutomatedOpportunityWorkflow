@@ -1,6 +1,8 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { getDiscoveryService, initializeDiscoveryService } from '../services/discovery.service';
+import { InMemorySourceRegistryService } from '../registry/source-registry.service';
+import { SourceCategory, SourceType, AccessMethod } from 'shared/registry/types';
 import { 
   createJobOptionsSchema,
   discoveryJobSchema,
@@ -19,10 +21,27 @@ import { logger } from '../utils/logger';
 import { zodToJson } from '../utils/schema-converter';
 
 export async function discoveryRoutes(fastify: FastifyInstance): Promise<void> {
-  // Initialize discovery service with dependencies
+  // Initialize real source registry and seed USAJOBS
+  const sourceRegistryService = new InMemorySourceRegistryService();
+  await sourceRegistryService.register({
+    name: 'USAJOBS',
+    url: 'https://data.usajobs.gov',
+    source_type: SourceType.API,
+    category: SourceCategory.GOVERNMENT,
+    enabled: true,
+    priority: 1,
+    access_method: AccessMethod.API_KEY,
+    authentication: { type: AccessMethod.API_KEY, requiresKey: true, notes: 'USAJOBS_API_KEY + USAJOBS_USER_AGENT' },
+    rate_limit: { requestsPerMinute: 10 },
+    cost: 'FREE',
+    reliability: 0.9,
+    metadata: { tags: ['government', 'employment', 'usajobs'] },
+  });
+  logger.info('Seeded USAJOBS source into registry');
+
   const discoveryService = initializeDiscoveryService({
-    sourceRegistryService: {}, // placeholder
-    adapterFactory: {}, // placeholder
+    sourceRegistryService,
+    adapterFactory: {},
   });
 
   // Create discovery job

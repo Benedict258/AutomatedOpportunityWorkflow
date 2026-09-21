@@ -133,16 +133,18 @@ export class DiscoveryEngine {
   }
 
   private async resolveSources(job: DiscoveryJob): Promise<string[]> {
-    // Scaffolding: resolve source IDs from registry based on job criteria
-    // Future implementation will query SourceRegistryService:
-    // - if job.sourceIds provided -> validate existence and enabled
-    // - if runAllEnabled -> list enabled sources filtered by category/priority
     if (job.sourceIds && job.sourceIds.length > 0) {
       return [...job.sourceIds];
     }
 
-    // Placeholder for runAllEnabled logic
-    // In production, call sourceRegistryService.listEnabled() with filters
+    if (job.runAllEnabled) {
+      const registry = this.options.sourceRegistryService as { listEnabled?: () => Promise<Array<{ source_id: string }>> } | undefined;
+      if (registry?.listEnabled) {
+        const sources = await registry.listEnabled();
+        return sources.map(s => s.source_id);
+      }
+    }
+
     return [];
   }
 
