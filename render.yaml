@@ -48,7 +48,7 @@ services:
       - key: MODEL_NVIDIA_EMBED_1B_CAPABILITIES
         value: embeddings
       - key: MODEL_NVIDIA_EMBED_1B_DIMENSIONS
-        value: "2048"
+        value: "1024"
       - key: MODEL_NVIDIA_EMBED_1B_ENABLED
         value: "true"
       - key: MODEL_DEFAULT_EXTRACTION
