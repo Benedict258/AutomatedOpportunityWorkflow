@@ -114,16 +114,46 @@ export class PipelineOrchestrator {
   }
 
   private async executeSourcesStage(context: DiscoveryExecutionContext): Promise<StageResult> {
-    // Scaffolding: orchestrate per-source discovery with retry boundaries and failure isolation
-    // Actual discovery will be delegated to adapters later
     const sourceResults: Record<string, SourceStageResult> = {};
+
+    const registry = context.sourceRegistryService as { getById?: (id: string) => Promise<{ source_id: string; name: string } | null> } | undefined;
+    const factories = context.adapterFactory as Array<{ canHandle: (s: any) => boolean; create: (s: any) => any }> | undefined;
+
     for (const sourceId of context.sources) {
-      sourceResults[sourceId] = {
-        sourceId,
-        status: 'SKIPPED', // Placeholder until adapter execution is wired
-        startedAt: new Date().toISOString(),
-        completedAt: new Date().toISOString(),
-      };
+      const startedAt = new Date().toISOString();
+      try {
+        const sourceEntry = registry?.getById ? await registry.getById(sourceId) : null;
+        if (!sourceEntry) {
+          sourceResults[sourceId] = { sourceId, status: 'SKIPPED', startedAt, completedAt: new Date().toISOString(), error: 'Source not found in registry' };
+          continue;
+        }
+
+        const factory = factories?.find(f => f.canHandle(sourceEntry));
+        if (!factory) {
+          sourceResults[sourceId] = { sourceId, status: 'SKIPPED', startedAt, completedAt: new Date().toISOString(), error: 'No adapter found for source' };
+          continue;
+        }
+
+        const adapter = factory.create(sourceEntry);
+        const raw = await adapter.fetch({ sourceId, raw: true, limit: 20 });
+        const collected = Array.isArray(raw) ? raw.length : (raw ? 1 : 0);
+
+        sourceResults[sourceId] = {
+          sourceId,
+          status: 'SUCCEEDED',
+          startedAt,
+          completedAt: new Date().toISOString(),
+          itemsDiscovered: collected,
+        };
+      } catch (err) {
+        sourceResults[sourceId] = {
+          sourceId,
+          status: 'FAILED',
+          startedAt,
+          completedAt: new Date().toISOString(),
+          error: err instanceof Error ? err.message : String(err),
+        };
+      }
     }
 
     return {

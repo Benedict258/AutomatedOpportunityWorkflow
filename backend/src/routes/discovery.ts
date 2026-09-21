@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { getDiscoveryService, initializeDiscoveryService } from '../services/discovery.service';
 import { InMemorySourceRegistryService } from '../registry/source-registry.service';
+import { createDefaultAdapterFactories } from '../discovery/collection/adapter-registry';
 import { SourceCategory, SourceType, AccessMethod } from 'shared/registry/types';
 import { 
   createJobOptionsSchema,
@@ -39,9 +40,12 @@ export async function discoveryRoutes(fastify: FastifyInstance): Promise<void> {
   });
   logger.info('Seeded USAJOBS source into registry');
 
+  const adapterFactories = createDefaultAdapterFactories();
+  logger.info({ count: adapterFactories.length }, 'Registered adapter factories');
+
   const discoveryService = initializeDiscoveryService({
     sourceRegistryService,
-    adapterFactory: {},
+    adapterFactory: adapterFactories,
   });
 
   // Create discovery job
