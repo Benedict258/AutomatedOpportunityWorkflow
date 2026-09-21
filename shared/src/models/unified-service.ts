@@ -52,7 +52,6 @@ export class UnifiedModelService {
       this.registry.loadConfig(modelConfig);
     } catch (e) {
       console.warn('Could not load model config from environment, using defaults');
-      console.error('Model config load error:', e instanceof Error ? e.message : e);
     }
 
     // Register provider factory
