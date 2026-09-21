@@ -7,16 +7,11 @@
     "build": "tsc"
   },
   "dependencies": {
-    "automated-opportunity-workflow": "file:..",
     "axios": "^1.7.0",
     "js-yaml": "^4.1.0",
     "zod": "^3.23.8",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^24.0.0"
-  },
-  "devDependencies": {
-    "@types/axios": "^0.14.0",
-    "undici-types": "^6.19.0",
+    "@types/node": "^24.0.0",
     "typescript": "^5.3.3"
   }
 }
