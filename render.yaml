@@ -3,7 +3,7 @@ services:
     name: ois-api
     runtime: node
     plan: starter
-    buildCommand: cd shared && npm install && npm run build && cd ../backend && npm install && npm run build
+    buildCommand: cd shared && NODE_ENV=development npm install && npm run build && cd ../backend && NODE_ENV=development npm install && npm run build
     startCommand: cd backend && npm start
     envVars:
       - key: NODE_ENV
