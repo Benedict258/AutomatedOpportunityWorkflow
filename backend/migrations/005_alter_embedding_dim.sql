@@ -1,6 +1,9 @@
 -- Migration 005: Alter embedding dimension from 1536 to 2048
 -- Aligns schema with NVIDIA Nemotron-3-Embed-1B (2048 dimensions)
 
+-- Drop the view that depends on the embedding column
+DROP VIEW IF EXISTS embedding_search;
+
 -- Drop existing IVFFlat indexes that reference the old dimension
 DROP INDEX IF EXISTS idx_opportunities_embedding;
 DROP INDEX IF EXISTS idx_candidate_profiles_embedding;
@@ -28,11 +31,24 @@ CREATE INDEX idx_skills_embedding
 CREATE INDEX idx_embeddings_vector_ivfflat
     ON embeddings USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
 
--- Optional: Uncomment to create HNSW indexes for better performance (requires pgvector >= 0.5.0)
--- CREATE INDEX idx_opportunities_embedding_hnsw ON opportunities USING hnsw (embedding vector_cosine_ops) WITH (m = 16, ef_construction = 64);
--- CREATE INDEX idx_candidate_profiles_embedding_hnsw ON candidate_profiles USING hnsw (embedding vector_cosine_ops) WITH (m = 16, ef_construction = 64);
--- CREATE INDEX idx_skills_embedding_hnsw ON skills USING hnsw (embedding vector_cosine_ops) WITH (m = 16, ef_construction = 64);
--- CREATE INDEX idx_embeddings_vector_hnsw ON embeddings USING hnsw (embedding vector_cosine_ops) WITH (m = 16, ef_construction = 64);
+-- Recreate the view with updated column references
+CREATE OR REPLACE VIEW embedding_search AS
+SELECT 
+    e.id as embedding_id,
+    em.id as metadata_id,
+    em.entity_type,
+    em.entity_id,
+    em.model,
+    em.model_version,
+    em.provider,
+    em.dimensions,
+    em.version,
+    em.source_text_hash,
+    em.created_at,
+    em.updated_at,
+    e.embedding
+FROM embeddings e
+JOIN embedding_metadata em ON em.id = e.metadata_id;
 
 -- Update comment on embeddings.embedding column
 COMMENT ON COLUMN embeddings.embedding IS 'Vector embedding (2048 dimensions for nvidia/nemotron-3-embed-1b)';
