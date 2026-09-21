@@ -90,8 +90,9 @@ export class DiscoveryService {
   }
 
   // Get run results (discovered opportunities)
-  async getRunResults(runId: string): Promise<{ run: DiscoveryRunRecord | null; opportunities: any[] }> {
-    const run = await this.runCoordinator.getRunStatus(runId);
+  async getRunResults(runId: string): Promise<{ run: any | null; opportunities: any[] }> {
+    // Get run from engine's in-memory store (discovery_runs table doesn't exist yet)
+    const run = await this.engine.getRunStatus(runId);
     if (!run) {
       return { run: null, opportunities: [] };
     }
